@@ -27,6 +27,7 @@
 (defn get-user-tweets [name cb]
   (let [params (js-obj "screen_name" name
                        "count" max-per-request)]
+    (.log js/console (str "Getting tweets for user" name))
     (.get client
           "statuses/user_timeline"
           params
