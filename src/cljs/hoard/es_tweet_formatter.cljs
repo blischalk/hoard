@@ -9,11 +9,13 @@
   [data]
   (js/JSON.parse (js/JSON.stringify data)))
 
-(defn format-bulk-data [data]
-  (doseq [t (fix-array data)]
-    (.log js/console t))
+(defn tweet-formatter [tweet]
+  (let [idx (js-obj "index" (js-obj "_index" "tweets"
+                                    "_type" "tweets"
+                                    "_id" (aget tweet "id")))
+        text (js-obj "text" (aget tweet "text"))]
+    [idx text]))
 
-  (js-obj "body" (clj->js [(js-obj "index" (js-obj "_index" "tweets"
-                                                   "_type" "tweets"
-                                                   "_id" 1))
-                           (js-obj "title" "foobar")])))
+(defn format-bulk-data [data]
+  (let [inserts (doall (map tweet-formatter (fix-array data)))]
+    (js-obj "body" (clj->js (flatten inserts)))))
