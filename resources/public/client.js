@@ -32866,17 +32866,17 @@ goog.require("cljs.core");
 goog.require("cljs.nodejs");
 hoard.twitter.Twitter = cljs.nodejs.require.call(null, "twitter");
 hoard.twitter.cfg = function() {
-  var obj5429 = {"consumer_key":process["env"]["TWITTER_CONSUMER_KEY"], "consumer_secret":process["env"]["TWITTER_CONSUMER_SECRET"], "access_token_key":process["env"]["TWITTER_ACCESS_TOKEN_KEY"], "access_token_secret":process["env"]["TWITTER_ACCESS_TOKEN_SECRET"]};
-  return obj5429;
+  var obj11184 = {"consumer_key":process["env"]["TWITTER_CONSUMER_KEY"], "consumer_secret":process["env"]["TWITTER_CONSUMER_SECRET"], "access_token_key":process["env"]["TWITTER_ACCESS_TOKEN_KEY"], "access_token_secret":process["env"]["TWITTER_ACCESS_TOKEN_SECRET"]};
+  return obj11184;
 }();
 hoard.twitter.max_per_request = 3E3;
 hoard.twitter.client = new hoard.twitter.Twitter(hoard.twitter.cfg);
 hoard.twitter.get_user_tweets = function get_user_tweets(name, cb) {
   var params = function() {
-    var obj5433 = {"screen_name":name, "count":hoard.twitter.max_per_request};
-    return obj5433;
+    var obj11188 = {"screen_name":name, "count":hoard.twitter.max_per_request};
+    return obj11188;
   }();
-  console.log([cljs.core.str("Getting tweets for user"), cljs.core.str(name)].join(""));
+  console.log([cljs.core.str("Getting tweets for user "), cljs.core.str(name)].join(""));
   return hoard.twitter.client.get("statuses/user_timeline", params, cb);
 };
 goog.provide("goog.labs.userAgent.util");
@@ -53751,22 +53751,22 @@ hoard.es_tweet_formatter.fix_array = function fix_array(data) {
 };
 hoard.es_tweet_formatter.tweet_formatter = function tweet_formatter(tweet) {
   var idx = function() {
-    var obj10300 = {"index":function() {
-      var obj10302 = {"_index":"tweets", "_type":"tweets", "_id":tweet["id"]};
-      return obj10302;
+    var obj11112 = {"index":function() {
+      var obj11114 = {"_index":"tweets", "_type":"tweets", "_id":tweet["id"]};
+      return obj11114;
     }()};
-    return obj10300;
+    return obj11112;
   }();
-  var text = function() {
-    var obj10304 = {"text":tweet["text"]};
-    return obj10304;
+  var data = function() {
+    var obj11116 = {"text":tweet["text"], "name":tweet["user"]["name"], "screen_name":tweet["user"]["screen_name"]};
+    return obj11116;
   }();
-  return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [idx, text], null);
+  return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [idx, data], null);
 };
 hoard.es_tweet_formatter.format_bulk_data = function format_bulk_data(data) {
   var inserts = cljs.core.doall.call(null, cljs.core.map.call(null, hoard.es_tweet_formatter.tweet_formatter, hoard.es_tweet_formatter.fix_array.call(null, data)));
-  var obj10308 = {"body":cljs.core.clj__GT_js.call(null, cljs.core.flatten.call(null, inserts))};
-  return obj10308;
+  var obj11120 = {"body":cljs.core.clj__GT_js.call(null, cljs.core.flatten.call(null, inserts))};
+  return obj11120;
 };
 goog.provide("hoard.data_processing");
 goog.require("cljs.core");
@@ -53780,43 +53780,43 @@ hoard.data_processing.init = function init(data_channel) {
     return function() {
       var f__6582__auto__ = function() {
         var switch__6525__auto__ = function(c__6581__auto__) {
-          return function(state_10353) {
-            var state_val_10354 = state_10353[1];
-            if (state_val_10354 === 4) {
-              var inst_10344 = state_10353[2];
-              var inst_10345 = cljs.core.nth.call(null, inst_10344, 0, null);
-              var inst_10346 = cljs.core.nth.call(null, inst_10344, 1, null);
-              var inst_10347 = console.log("Received Data");
-              var inst_10348 = hoard.es_tweet_formatter.format_bulk_data.call(null, inst_10345);
-              var inst_10349 = hoard.elasticsearch.bulk_insert.call(null, inst_10348);
-              var state_10353__$1 = function() {
-                var statearr_10355 = state_10353;
-                statearr_10355[7] = inst_10347;
-                statearr_10355[8] = inst_10346;
-                return statearr_10355;
+          return function(state_11165) {
+            var state_val_11166 = state_11165[1];
+            if (state_val_11166 === 4) {
+              var inst_11156 = state_11165[2];
+              var inst_11157 = cljs.core.nth.call(null, inst_11156, 0, null);
+              var inst_11158 = cljs.core.nth.call(null, inst_11156, 1, null);
+              var inst_11159 = console.log("Received Data");
+              var inst_11160 = hoard.es_tweet_formatter.format_bulk_data.call(null, inst_11157);
+              var inst_11161 = hoard.elasticsearch.bulk_insert.call(null, inst_11160);
+              var state_11165__$1 = function() {
+                var statearr_11167 = state_11165;
+                statearr_11167[7] = inst_11159;
+                statearr_11167[8] = inst_11158;
+                return statearr_11167;
               }();
-              var statearr_10356_10365 = state_10353__$1;
-              statearr_10356_10365[2] = inst_10349;
-              statearr_10356_10365[1] = 3;
+              var statearr_11168_11177 = state_11165__$1;
+              statearr_11168_11177[2] = inst_11161;
+              statearr_11168_11177[1] = 3;
               return new cljs.core.Keyword(null, "recur", "recur", -437573268);
             } else {
-              if (state_val_10354 === 3) {
-                var inst_10351 = state_10353[2];
-                var state_10353__$1 = state_10353;
-                return cljs.core.async.impl.ioc_helpers.return_chan.call(null, state_10353__$1, inst_10351);
+              if (state_val_11166 === 3) {
+                var inst_11163 = state_11165[2];
+                var state_11165__$1 = state_11165;
+                return cljs.core.async.impl.ioc_helpers.return_chan.call(null, state_11165__$1, inst_11163);
               } else {
-                if (state_val_10354 === 2) {
-                  var inst_10340 = cljs.core.PersistentVector.EMPTY_NODE;
-                  var inst_10341 = [data_channel];
-                  var inst_10342 = new cljs.core.PersistentVector(null, 1, 5, inst_10340, inst_10341, null);
-                  var state_10353__$1 = state_10353;
-                  return cljs.core.async.ioc_alts_BANG_.call(null, state_10353__$1, 4, inst_10342);
+                if (state_val_11166 === 2) {
+                  var inst_11152 = cljs.core.PersistentVector.EMPTY_NODE;
+                  var inst_11153 = [data_channel];
+                  var inst_11154 = new cljs.core.PersistentVector(null, 1, 5, inst_11152, inst_11153, null);
+                  var state_11165__$1 = state_11165;
+                  return cljs.core.async.ioc_alts_BANG_.call(null, state_11165__$1, 4, inst_11154);
                 } else {
-                  if (state_val_10354 === 1) {
-                    var state_10353__$1 = state_10353;
-                    var statearr_10357_10366 = state_10353__$1;
-                    statearr_10357_10366[2] = null;
-                    statearr_10357_10366[1] = 2;
+                  if (state_val_11166 === 1) {
+                    var state_11165__$1 = state_11165;
+                    var statearr_11169_11178 = state_11165__$1;
+                    statearr_11169_11178[2] = null;
+                    statearr_11169_11178[1] = 2;
                     return new cljs.core.Keyword(null, "recur", "recur", -437573268);
                   } else {
                     return null;
@@ -53830,17 +53830,17 @@ hoard.data_processing.init = function init(data_channel) {
           return function() {
             var state_machine__6526__auto__ = null;
             var state_machine__6526__auto____0 = function() {
-              var statearr_10361 = [null, null, null, null, null, null, null, null, null];
-              statearr_10361[0] = state_machine__6526__auto__;
-              statearr_10361[1] = 1;
-              return statearr_10361;
+              var statearr_11173 = [null, null, null, null, null, null, null, null, null];
+              statearr_11173[0] = state_machine__6526__auto__;
+              statearr_11173[1] = 1;
+              return statearr_11173;
             };
-            var state_machine__6526__auto____1 = function(state_10353) {
+            var state_machine__6526__auto____1 = function(state_11165) {
               while (true) {
                 var ret_value__6527__auto__ = function() {
                   try {
                     while (true) {
-                      var result__6528__auto__ = switch__6525__auto__.call(null, state_10353);
+                      var result__6528__auto__ = switch__6525__auto__.call(null, state_11165);
                       if (cljs.core.keyword_identical_QMARK_.call(null, result__6528__auto__, new cljs.core.Keyword(null, "recur", "recur", -437573268))) {
                         continue;
                       } else {
@@ -53848,21 +53848,21 @@ hoard.data_processing.init = function init(data_channel) {
                       }
                       break;
                     }
-                  } catch (e10362) {
-                    if (e10362 instanceof Object) {
-                      var ex__6529__auto__ = e10362;
-                      var statearr_10363_10367 = state_10353;
-                      statearr_10363_10367[5] = ex__6529__auto__;
-                      cljs.core.async.impl.ioc_helpers.process_exception.call(null, state_10353);
+                  } catch (e11174) {
+                    if (e11174 instanceof Object) {
+                      var ex__6529__auto__ = e11174;
+                      var statearr_11175_11179 = state_11165;
+                      statearr_11175_11179[5] = ex__6529__auto__;
+                      cljs.core.async.impl.ioc_helpers.process_exception.call(null, state_11165);
                       return new cljs.core.Keyword(null, "recur", "recur", -437573268);
                     } else {
-                      throw e10362;
+                      throw e11174;
                     }
                   }
                 }();
                 if (cljs.core.keyword_identical_QMARK_.call(null, ret_value__6527__auto__, new cljs.core.Keyword(null, "recur", "recur", -437573268))) {
-                  var G__10368 = state_10353;
-                  state_10353 = G__10368;
+                  var G__11180 = state_11165;
+                  state_11165 = G__11180;
                   continue;
                 } else {
                   return ret_value__6527__auto__;
@@ -53870,12 +53870,12 @@ hoard.data_processing.init = function init(data_channel) {
                 break;
               }
             };
-            state_machine__6526__auto__ = function(state_10353) {
+            state_machine__6526__auto__ = function(state_11165) {
               switch(arguments.length) {
                 case 0:
                   return state_machine__6526__auto____0.call(this);
                 case 1:
-                  return state_machine__6526__auto____1.call(this, state_10353);
+                  return state_machine__6526__auto____1.call(this, state_11165);
               }
               throw new Error("Invalid arity: " + arguments.length);
             };
@@ -53886,9 +53886,9 @@ hoard.data_processing.init = function init(data_channel) {
         }(switch__6525__auto__, c__6581__auto__);
       }();
       var state__6583__auto__ = function() {
-        var statearr_10364 = f__6582__auto__.call(null);
-        statearr_10364[cljs.core.async.impl.ioc_helpers.USER_START_IDX] = c__6581__auto__;
-        return statearr_10364;
+        var statearr_11176 = f__6582__auto__.call(null);
+        statearr_11176[cljs.core.async.impl.ioc_helpers.USER_START_IDX] = c__6581__auto__;
+        return statearr_11176;
       }();
       return cljs.core.async.impl.ioc_helpers.run_state_machine_wrapped.call(null, state__6583__auto__);
     };

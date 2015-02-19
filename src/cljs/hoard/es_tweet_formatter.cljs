@@ -13,8 +13,10 @@
   (let [idx (js-obj "index" (js-obj "_index" "tweets"
                                     "_type" "tweets"
                                     "_id" (aget tweet "id")))
-        text (js-obj "text" (aget tweet "text"))]
-    [idx text]))
+        data (js-obj "text" (aget tweet "text")
+                     "name" (aget tweet "user" "name")
+                     "screen_name" (aget tweet "user" "screen_name"))]
+    [idx data]))
 
 (defn format-bulk-data [data]
   (let [inserts (doall (map tweet-formatter (fix-array data)))]
