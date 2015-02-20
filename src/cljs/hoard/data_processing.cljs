@@ -11,4 +11,5 @@
     (loop []
         (let [[v c] (alts! [data-channel])]
           (.log js/console "Received Data")
-          (es/bulk-insert (fmt/format-bulk-data v))))))
+          (es/bulk-insert (fmt/format-bulk-data v)))
+        (recur))))

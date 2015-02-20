@@ -7,6 +7,7 @@
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [org.clojure/clojurescript "0.0-2814"]
                  [com.cemerick/piggieback "0.1.5"]
+                 [org.omcljs/om "0.8.8"]
                  [enfocus "2.1.1"]
                  [weasel "0.5.0"]]
   :source-paths ["src/clj"]

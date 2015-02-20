@@ -7,18 +7,19 @@
 
 (def load-sample-data? false)
 
-(defn data [channel]
+(defn data [screen_name channel]
   (if load-sample-data?
-    (from-file channel)
-    (from-twitter channel)))
+    (from-file screen_name channel)
+    (from-twitter screen_name channel)))
 
-(defn from-file [channel]
+(defn from-file [screen_name channel]
   (let [data (node/require "./tweets.json")]
     (.log js/console "Placing data on channel")
+    (.log js/console data)
     (put! channel data)))
 
-(defn from-twitter [channel]
-  (t/get-user-tweets "blischalk"
+(defn from-twitter [screen_name channel]
+  (t/get-user-tweets screen_name
                      (fn [error tweets response]
                        (if error
                          (.log js/console error)

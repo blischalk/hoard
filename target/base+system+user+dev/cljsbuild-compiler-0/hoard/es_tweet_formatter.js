@@ -11,18 +11,15 @@ hoard.es_tweet_formatter.fix_array = (function fix_array(data){
 return JSON.parse(JSON.stringify(data));
 });
 hoard.es_tweet_formatter.tweet_formatter = (function tweet_formatter(tweet){
-var idx = (function (){var obj11112 = {"index":(function (){var obj11114 = {"_index":"tweets","_type":"tweets","_id":(tweet["id"])};
-return obj11114;
+var idx = (function (){var obj13317 = {"index":(function (){var obj13319 = {"_index":"tweets","_type":"tweets","_id":(tweet["id"])};
+return obj13319;
 })()};
-return obj11112;
+return obj13317;
 })();
-var data = (function (){var obj11116 = {"text":(tweet["text"]),"name":(tweet["user"]["name"]),"screen_name":(tweet["user"]["screen_name"])};
-return obj11116;
-})();
-return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [idx,data], null);
+return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [idx,tweet], null);
 });
 hoard.es_tweet_formatter.format_bulk_data = (function format_bulk_data(data){
 var inserts = cljs.core.doall.call(null,cljs.core.map.call(null,hoard.es_tweet_formatter.tweet_formatter,hoard.es_tweet_formatter.fix_array.call(null,data)));
-var obj11120 = {"body":cljs.core.clj__GT_js.call(null,cljs.core.flatten.call(null,inserts))};
-return obj11120;
+var obj13323 = {"body":cljs.core.clj__GT_js.call(null,cljs.core.flatten.call(null,inserts))};
+return obj13323;
 });
