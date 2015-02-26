@@ -8,13 +8,15 @@
                  [org.clojure/clojurescript "0.0-2814"]
                  [com.cemerick/piggieback "0.1.5"]
                  [org.omcljs/om "0.8.8"]
+                 [racehub/om-bootstrap "0.4.0"]
                  [enfocus "2.1.1"]
                  [weasel "0.5.0"]]
   :source-paths ["src/clj"]
   :main ^:skip-aot hoard.core
   :target-path "target/%s"
   :plugins [[lein-node-webkit-build "0.1.6"]
-            [lein-cljsbuild "1.0.3"]]
+            [lein-cljsbuild "1.0.3"]
+            [com.cemerick/clojurescript.test "0.3.3"]]
   :cljsbuild {:builds [{:source-paths ["src/cljs"]
                         :compiler {:output-to "resources/public/client.js"
                                    :optimizations :whitespace
