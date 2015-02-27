@@ -12,4 +12,6 @@
    (fn [err resp]
      (if err
        (.log js/console "Elasticsearch gave an error: " err)
-       (put! ch [:user-indexed screen_name])))))
+       (do (.log js/console "elastic search resp")
+           (.log js/console resp)
+         (put! ch [:user-indexed screen_name]))))))

@@ -5,7 +5,7 @@ goog.require('hoard.twitter');
 goog.require('hoard.backup');
 goog.require('cljs.nodejs');
 goog.require('cljs.core.async');
-hoard.acquire.load_sample_data_QMARK_ = true;
+hoard.acquire.load_sample_data_QMARK_ = false;
 hoard.acquire.data = (function data(screen_name,channel){
 if(cljs.core.truth_(hoard.acquire.load_sample_data_QMARK_)){
 return hoard.acquire.from_file.call(null,screen_name,channel);
@@ -26,7 +26,7 @@ return hoard.twitter.get_user_tweets.call(null,screen_name,(function (error,twee
 if(cljs.core.truth_(error)){
 return console.log(error);
 } else {
-console.log("Placing data on channel");
+console.log(tweets);
 
 return cljs.core.async.put_BANG_.call(null,channel,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"user-tweets","user-tweets",96109777),new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [screen_name,tweets], null)], null));
 }

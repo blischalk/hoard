@@ -5,7 +5,7 @@
             [hoard.backup :as bkup]
             [hoard.twitter :as t]))
 
-(def load-sample-data? true)
+(def load-sample-data? false)
 
 (defn data [screen_name channel]
   (if load-sample-data?
@@ -25,6 +25,6 @@
      (if error
        (.log js/console error)
        (do #_(bkup/to-file "tweets.json" tweets)
-           (.log js/console "Placing data on channel")
+           (.log js/console tweets)
            (put! channel
                  [:user-tweets [screen_name tweets]]))))))

@@ -33,7 +33,6 @@
            (apply dom/ul #js {:id "indexing-users"}
                   (om/build-all user-being-indexed users))))
 
-
 ;; Indexing Controls UI
 
 ;; Handlers
@@ -41,6 +40,33 @@
   (let [value (.. e -target -value)]
     (om/set-state! owner :btn-disabled (= value ""))
     (om/set-state! owner :screen-name value)))
+
+;; Indexing Start
+
+(defn index-user! [owner screen-name comm]
+  (.log js/console "the screen name is " screen-name)
+  (om/set-state! owner :screen-name "")
+  (om/set-state! owner :users [screen-name])
+  (acquire/data screen-name comm))
+
+;; Indexing Complete
+
+(defn index-complete [owner val]
+  (.log js/console "user " val "has been indexed!")
+  (om/set-state! owner :users []))
+
+;; Event Dispatch
+
+;; If ui updates are required we have functions within
+;; this namespace that will take care of that and
+;; forward any service requests otherwise we can
+;; call for service requests directly
+(defn handle-event [type owner val comm]
+  (case type
+    :index-user  (index-user! owner val comm)
+    :user-tweets (dp/init val comm)
+    :user-indexed (index-complete owner val)
+    nil))
 
 ;; UI Elements
 (defn user-to-index [owner state]
@@ -60,51 +86,42 @@
         :disabled (:btn-disabled state)}
    "Index User"))
 
-;; Indexing Start
+(defn user-indexing-form [owner state comm]
+  (dom/div #js {:id "index-user"}
+           (user-to-index owner state)
+           (indexing-submit owner state comm)))
 
-(defn index-user! [owner screen-name comm]
-  (.log js/console "the screen name is " screen-name)
-  (om/set-state! owner :screen-name "")
-  (om/set-state! owner :users [screen-name])
-  (acquire/data screen-name comm))
-
-;; Indexing Complete
-
-(defn index-complete [owner val]
-  (.log js/console "user " val "has been indexed!")
-  (om/set-state! owner :users []))
-
-;; Event Dispatch
-
-(defn handle-event [type owner val comm]
-  (case type
-    :index-user  (index-user! owner val comm)
-    :user-tweets (dp/init val comm)
-    :user-indexed (index-complete owner val)
-    nil))
+(defn main-view [owner state comm]
+  (dom/div #js {:className "container"}
+           (dom/h1 nil "Index User")
+           ;; Display indexing status view
+           (users-being-indexed owner state)
+           ;; Display the indexing form view
+           (user-indexing-form owner state comm)))
 
 (defn indexing-ui [data owner]
   (reify
     om/IWillMount
     (will-mount [_]
       (let [comm (chan)]
+        ;; When app starts up we setup a communication channel
+        ;; for the various stages to give status updates
         (om/set-state! owner :comm comm)
+
+        ;; Listen for updates and dispatch accordingly
         (go (while true
               (let [[type value] (<! comm)]
                 (handle-event type owner value comm))))))
     om/IInitState
+    ;; Setup our initial UI state
     (init-state [_]
       {:screen-name ""
        :btn-disabled true
        :users []})
     om/IRenderState
     (render-state [this {:keys [comm] :as state}]
-      (dom/div #js {:className "container"}
-               (dom/h2 nil "Index User")
-               (users-being-indexed owner state)
-               (dom/div #js {:id "index-user"}
-                        (user-to-index owner state)
-                        (indexing-submit owner state comm))))))
+      ;; Display the view
+      (main-view owner state comm))))
 
 (om/root indexing-ui app-state
   {:target (. js/document (getElementById "my-app"))})

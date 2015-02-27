@@ -8,7 +8,7 @@
 (def host "http://localhost:9250")
 
 (def cfg (js-obj "host" host
-                    "apiVersion" "1.2"))
+                 "apiVersion" "1.2"))
 
 (def client
   (new Elasticsearch.Client cfg))
@@ -29,7 +29,8 @@
   (js-obj "body" (clj->js [(js-obj "index" (js-obj "_index" "tweets"
                                                    "_type" "tweets"
                                                    "_id" 1))
-                           (js-obj "title" "foobar")])))
+                           (js-obj "title" "foobar")])
+          "timeout" 300000))
 
 (defn bulk-insert
   "Bulk inserts data into Elasticsearch"
