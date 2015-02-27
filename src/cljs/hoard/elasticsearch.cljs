@@ -33,13 +33,8 @@
 
 (defn bulk-insert
   "Bulk inserts data into Elasticsearch"
-  [bulk-body]
-  (.bulk client
-         bulk-body
-         (fn [err, resp]
-           (if err
-             (.log js/console err)
-             (.log js/console resp)))))
+  [bulk-body cb]
+  (.bulk client bulk-body cb))
 
 (defn query-es []
   (-> (.ping client

@@ -5,11 +5,11 @@
             [hoard.elasticsearch :as es]
             [hoard.es-tweet-formatter :as fmt]))
 
-(defn init [data-channel]
+(defn init [[screen_name data] ch]
   (.log js/console "Initializing data processing")
-  (go
-    (loop []
-        (let [[v c] (alts! [data-channel])]
-          (.log js/console "Received Data")
-          (es/bulk-insert (fmt/format-bulk-data v)))
-        (recur))))
+  (es/bulk-insert
+   (fmt/format-bulk-data data)
+   (fn [err resp]
+     (if err
+       (.log js/console "Elasticsearch gave an error: " err)
+       (put! ch [:user-indexed screen_name])))))

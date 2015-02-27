@@ -15,14 +15,16 @@
 (defn from-file [screen_name channel]
   (let [data (node/require "./tweets.json")]
     (.log js/console "Placing data on channel")
-    (.log js/console data)
-    (put! channel data)))
+    (put! channel [:user-tweets [screen_name data]])))
 
 (defn from-twitter [screen_name channel]
-  (t/get-user-tweets screen_name
-                     (fn [error tweets response]
-                       (if error
-                         (.log js/console error)
-                         (do #_(bkup/to-file "tweets.json" tweets)
-                             (.log js/console "Placing data on channel")
-                             (put! channel tweets))))))
+  (.log js/console "getting data from twitter")
+  (t/get-user-tweets
+   screen_name
+   (fn [error tweets response]
+     (if error
+       (.log js/console error)
+       (do #_(bkup/to-file "tweets.json" tweets)
+           (.log js/console "Placing data on channel")
+           (put! channel
+                 [:user-tweets [screen_name tweets]]))))))

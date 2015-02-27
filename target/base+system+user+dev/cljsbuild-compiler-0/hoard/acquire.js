@@ -17,18 +17,18 @@ hoard.acquire.from_file = (function from_file(screen_name,channel){
 var data = cljs.nodejs.require.call(null,"./tweets.json");
 console.log("Placing data on channel");
 
-console.log(data);
-
-return cljs.core.async.put_BANG_.call(null,channel,data);
+return cljs.core.async.put_BANG_.call(null,channel,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"user-tweets","user-tweets",96109777),new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [screen_name,data], null)], null));
 });
 hoard.acquire.from_twitter = (function from_twitter(screen_name,channel){
+console.log("getting data from twitter");
+
 return hoard.twitter.get_user_tweets.call(null,screen_name,(function (error,tweets,response){
 if(cljs.core.truth_(error)){
 return console.log(error);
 } else {
 console.log("Placing data on channel");
 
-return cljs.core.async.put_BANG_.call(null,channel,tweets);
+return cljs.core.async.put_BANG_.call(null,channel,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"user-tweets","user-tweets",96109777),new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [screen_name,tweets], null)], null));
 }
 }));
 });
