@@ -27,8 +27,6 @@ return from_twitter.call(null,screen_name,channel,null);
 var from_twitter__3 = (function (screen_name,channel,max_id){
 console.log("getting data from twitter");
 
-console.log("the max id is: ",max_id);
-
 return hoard.twitter.get_user_tweets.call(null,screen_name,max_id,(function (error,tweets,response){
 if(cljs.core.truth_(error)){
 return console.log(error);
@@ -36,12 +34,12 @@ return console.log(error);
 var js_data = cljs.core.js__GT_clj.call(null,tweets);
 var cnt = js_data.length;
 var last_tweet_id = (js_data[(cnt - (1))]["id"]);
-cljs.core.async.put_BANG_.call(null,channel,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"user-tweets","user-tweets",96109777),new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [screen_name,tweets], null)], null));
+if(!(cljs.core._EQ_.call(null,last_tweet_id,max_id))){
+cljs.core.async.put_BANG_.call(null,channel,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"user-tweets","user-tweets",96109777),new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [screen_name,tweets,true], null)], null));
 
-if(!(cljs.core._EQ_.call(null,(1),cnt))){
 return from_twitter.call(null,screen_name,channel,last_tweet_id);
 } else {
-return null;
+return cljs.core.async.put_BANG_.call(null,channel,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"user-tweets","user-tweets",96109777),new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [screen_name,tweets,false], null)], null));
 }
 }
 }));

@@ -22,7 +22,6 @@
    (from-twitter screen_name channel nil))
   ([screen_name channel max_id]
    (.log js/console "getting data from twitter")
-   (.log js/console "the max id is: " max_id)
    (t/get-user-tweets
     screen_name
     max_id
@@ -32,8 +31,8 @@
         (let [js-data (js->clj tweets)
               cnt (.-length js-data)
               last-tweet-id (aget js-data (- cnt 1) "id")]
-          (put! channel
-                [:user-tweets [screen_name tweets]])
           ;; Keep recursively calling for more tweets until we get them all
-          (when (not (= 1 cnt))
-            (from-twitter screen_name channel last-tweet-id))))))))
+          (if (not (= last-tweet-id max_id))
+            (do (put! channel [:user-tweets [screen_name tweets true]])
+              (from-twitter screen_name channel last-tweet-id))
+            (put! channel [:user-tweets [screen_name tweets false]]))))))))

@@ -19,7 +19,7 @@
                                       "env"
                                       "TWITTER_ACCESS_TOKEN_SECRET")))
 
-(def max-per-request 100)
+(def max-per-request 3000)
 
 (def client
   (Twitter. cfg))
@@ -27,9 +27,12 @@
 (defn get-user-tweets [name max_id cb]
   (let [params (js-obj "screen_name" name
                        "count" max-per-request)]
+
+  (if (nil? (js->clj max_id))
+              params
+              (aset params "max_id" max_id))
+
     (.get client
           "statuses/user_timeline"
-          (if (nil? (js->clj max_id))
-            params
-            (aset params "max_id" max_id))
+          params
           cb)))
