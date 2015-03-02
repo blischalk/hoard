@@ -17,14 +17,23 @@
     (.log js/console "Placing data on channel")
     (put! channel [:user-tweets [screen_name data]])))
 
-(defn from-twitter [screen_name channel]
-  (.log js/console "getting data from twitter")
-  (t/get-user-tweets
-   screen_name
-   (fn [error tweets response]
-     (if error
-       (.log js/console error)
-       (do #_(bkup/to-file "tweets.json" tweets)
-           (.log js/console tweets)
-           (put! channel
-                 [:user-tweets [screen_name tweets]]))))))
+(defn from-twitter
+  ([screen_name channel]
+   (from-twitter screen_name channel nil))
+  ([screen_name channel max_id]
+   (.log js/console "getting data from twitter")
+   (.log js/console "the max id is: " max_id)
+   (t/get-user-tweets
+    screen_name
+    max_id
+    (fn [error tweets response]
+      (if error
+        (.log js/console error)
+        (let [js-data (js->clj tweets)
+              cnt (.-length js-data)
+              last-tweet-id (aget js-data (- cnt 1) "id")]
+          (put! channel
+                [:user-tweets [screen_name tweets]])
+          ;; Keep recursively calling for more tweets until we get them all
+          (when (not (= 1 cnt))
+            (from-twitter screen_name channel last-tweet-id))))))))

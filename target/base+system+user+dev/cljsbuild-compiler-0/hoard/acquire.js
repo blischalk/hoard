@@ -19,16 +19,44 @@ console.log("Placing data on channel");
 
 return cljs.core.async.put_BANG_.call(null,channel,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"user-tweets","user-tweets",96109777),new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [screen_name,data], null)], null));
 });
-hoard.acquire.from_twitter = (function from_twitter(screen_name,channel){
+hoard.acquire.from_twitter = (function() {
+var from_twitter = null;
+var from_twitter__2 = (function (screen_name,channel){
+return from_twitter.call(null,screen_name,channel,null);
+});
+var from_twitter__3 = (function (screen_name,channel,max_id){
 console.log("getting data from twitter");
 
-return hoard.twitter.get_user_tweets.call(null,screen_name,(function (error,tweets,response){
+console.log("the max id is: ",max_id);
+
+return hoard.twitter.get_user_tweets.call(null,screen_name,max_id,(function (error,tweets,response){
 if(cljs.core.truth_(error)){
 return console.log(error);
 } else {
-console.log(tweets);
+var js_data = cljs.core.js__GT_clj.call(null,tweets);
+var cnt = js_data.length;
+var last_tweet_id = (js_data[(cnt - (1))]["id"]);
+cljs.core.async.put_BANG_.call(null,channel,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"user-tweets","user-tweets",96109777),new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [screen_name,tweets], null)], null));
 
-return cljs.core.async.put_BANG_.call(null,channel,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"user-tweets","user-tweets",96109777),new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [screen_name,tweets], null)], null));
+if(!(cljs.core._EQ_.call(null,(1),cnt))){
+return from_twitter.call(null,screen_name,channel,last_tweet_id);
+} else {
+return null;
+}
 }
 }));
 });
+from_twitter = function(screen_name,channel,max_id){
+switch(arguments.length){
+case 2:
+return from_twitter__2.call(this,screen_name,channel);
+case 3:
+return from_twitter__3.call(this,screen_name,channel,max_id);
+}
+throw(new Error('Invalid arity: ' + arguments.length));
+};
+from_twitter.cljs$core$IFn$_invoke$arity$2 = from_twitter__2;
+from_twitter.cljs$core$IFn$_invoke$arity$3 = from_twitter__3;
+return from_twitter;
+})()
+;
