@@ -71,6 +71,7 @@
 ;; UI Elements
 (defn user-to-index [owner state]
   (dom/input #js {:type "text"
+                  :className "form-control"
                   :placeholder "User to Index"
                   :ref "user-to-index"
                   :value (:screen-name state)
@@ -82,14 +83,16 @@
                         [:index-user (-> (om/get-node owner
                                                       "user-to-index")
                                          .-value)])
-        :className "btn btn-submit"
+        :className "btn btn-primary"
         :disabled (:btn-disabled state)}
    "Index User"))
 
 (defn user-indexing-form [owner state comm]
   (dom/div #js {:id "index-user"}
-           (user-to-index owner state)
-           (indexing-submit owner state comm)))
+           (dom/div #js {:className "input-group"}
+                    (user-to-index owner state)
+                    (dom/span #js {:className "input-group-btn"}
+                              (indexing-submit owner state comm)))))
 
 (defn main-view [owner state comm]
   (dom/div #js {:className "container"}

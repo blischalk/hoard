@@ -1,1 +1,13 @@
-/* Add your styles here /*
+/* Add your styles here */
+body {
+  background: steelBlue;
+}
+
+h1 {
+  color: #fff;
+}
+
+#index-user {
+  background: #ccc;
+  padding: 1%;
+}
