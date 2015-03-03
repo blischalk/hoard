@@ -5,7 +5,7 @@
             [hoard.backup :as bkup]
             [hoard.twitter :as t]))
 
-(def load-sample-data? false)
+(def load-sample-data? true)
 
 (defn data [screen_name channel]
   (if load-sample-data?
@@ -13,9 +13,9 @@
     (from-twitter screen_name channel)))
 
 (defn from-file [screen_name channel]
-  (let [data (node/require "./tweets.json")]
+  (let [tweets (node/require "./tweets.json")]
     (.log js/console "Placing data on channel")
-    (put! channel [:user-tweets [screen_name data]])))
+    (put! channel [:user-tweets [screen_name tweets false]])))
 
 (defn from-twitter
   ([screen_name channel]

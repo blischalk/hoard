@@ -47,3 +47,19 @@
                (if error
                  (.log js/console "elasticsearch cluster is down!")
                  (.log js/console "all is well"))))))
+
+
+(defn get-users [cb]
+  (.search client
+           (js-obj "index" "tweets"
+                   "searchType" "count"
+                   "body" (js-obj "query"
+                                  (js-obj "match_all"
+                                          (js-obj))
+                                  "aggs"
+                                  (js-obj "screen_names"
+                                          (js-obj "terms"
+                                                  (js-obj "field"
+                                                          "user.screen_name")))))
+           (fn [err resp]
+             (cb resp))))

@@ -5,7 +5,7 @@ goog.require('hoard.twitter');
 goog.require('hoard.backup');
 goog.require('cljs.nodejs');
 goog.require('cljs.core.async');
-hoard.acquire.load_sample_data_QMARK_ = false;
+hoard.acquire.load_sample_data_QMARK_ = true;
 hoard.acquire.data = (function data(screen_name,channel){
 if(cljs.core.truth_(hoard.acquire.load_sample_data_QMARK_)){
 return hoard.acquire.from_file.call(null,screen_name,channel);
@@ -14,10 +14,10 @@ return hoard.acquire.from_twitter.call(null,screen_name,channel);
 }
 });
 hoard.acquire.from_file = (function from_file(screen_name,channel){
-var data = cljs.nodejs.require.call(null,"./tweets.json");
+var tweets = cljs.nodejs.require.call(null,"./tweets.json");
 console.log("Placing data on channel");
 
-return cljs.core.async.put_BANG_.call(null,channel,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"user-tweets","user-tweets",96109777),new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [screen_name,data], null)], null));
+return cljs.core.async.put_BANG_.call(null,channel,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"user-tweets","user-tweets",96109777),new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [screen_name,tweets,false], null)], null));
 });
 hoard.acquire.from_twitter = (function() {
 var from_twitter = null;

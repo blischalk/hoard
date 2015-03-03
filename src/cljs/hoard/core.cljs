@@ -6,6 +6,7 @@
             [enfocus.effects :as effects]
             [hoard.acquire :as acquire]
             [hoard.data-processing :as dp]
+            [hoard.elasticsearch :as es]
             [hoard.util :as util]
             [om.core :as om]
             [om.dom :as dom]
@@ -18,7 +19,7 @@
 
 ;; App state
 
-(defonce app-state (atom {}))
+(defonce app-state (atom {:indexed-users []}))
 
 ;; Indexing Status UI
 (defn user-being-indexed [user owner]
@@ -88,31 +89,67 @@
    "Index User"))
 
 (defn user-indexing-form [owner state comm]
-  (dom/div #js {:id "index-user"}
+  (dom/div #js {:id "index-user"
+                :className "section"}
            (dom/div #js {:className "input-group"}
                     (user-to-index owner state)
                     (dom/span #js {:className "input-group-btn"}
                               (indexing-submit owner state comm)))))
 
-(defn main-view [owner state comm]
+(defn indexed-user [user]
+  (reify
+    om/IRender
+    (render [_] (dom/tr nil
+                        (dom/td nil (aget user "key"))
+                        (dom/td nil (aget user "doc_count"))))))
+
+(defn users-in-index [app]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div #js {:id "indexed-users"
+                    :className "section"}
+               (dom/h2 nil "Indexed Users:")
+               (.log js/console (:indexed-users app))
+               (dom/table #js {:className "table"}
+                          (dom/tr nil
+                                  (dom/th nil "Screen Name")
+                                  (dom/th nil "Tweet Count"))
+                          (apply dom/tbody nil
+                                 (om/build-all indexed-user (:indexed-users app))))))))
+
+(defn main-view [app-state owner state comm]
   (dom/div #js {:className "container"}
-           (dom/h1 nil "Index User")
+           (dom/h1 nil "Hoard")
            ;; Display indexing status view
            (users-being-indexed owner state)
            ;; Display the indexing form view
-           (user-indexing-form owner state comm)))
+           (user-indexing-form owner state comm)
+           (om/build users-in-index app-state)))
 
-(defn indexing-ui [data owner]
+(defn get-indexed-users [app-state]
+  (es/get-users
+   (fn [resp]
+     (let [tweet-data (array-seq (aget resp "aggregations" "screen_names" "buckets"))]
+       (.log js/console (aget (first tweet-data) "key"))
+       (om/update! app-state
+                     :indexed-users
+                     tweet-data)))))
+
+(defn indexing-ui [app-state owner]
   (reify
     om/IWillMount
     (will-mount [_]
       (let [comm (chan)]
+
         ;; When app starts up we setup a communication channel
         ;; for the various stages to give status updates
         (om/set-state! owner :comm comm)
 
         ;; Listen for updates and dispatch accordingly
-        (go (while true
+        (go
+          (get-indexed-users app-state)
+          (while true
               (let [[type value] (<! comm)]
                 (handle-event type owner value comm))))))
     om/IInitState
@@ -124,7 +161,7 @@
     om/IRenderState
     (render-state [this {:keys [comm] :as state}]
       ;; Display the view
-      (main-view owner state comm))))
+      (main-view app-state owner state comm))))
 
 (om/root indexing-ui app-state
   {:target (. js/document (getElementById "my-app"))})
