@@ -21,18 +21,32 @@
 
 (defonce app-state (atom {:indexed-users []}))
 
+
+(defn get-indexed-users [app-state]
+  (es/get-users
+   (fn [resp]
+     (let [tweet-data (array-seq (aget resp "aggregations" "screen_names" "buckets"))]
+       (om/update! app-state
+                     :indexed-users
+                     tweet-data)))))
+
 ;; Indexing Status UI
 (defn user-being-indexed [user owner]
   (reify
     om/IRender
     (render [_]
-      (dom/li nil user))))
+      (dom/tr nil (dom/td nil user)))))
 
 (defn users-being-indexed [_ {:keys [users]}]
-  (dom/div #js {:style (util/hidden (empty? users))}
+  (dom/div #js {:style (util/hidden (empty? users))
+                :id "indexing-users"
+                :className "section"}
            (dom/h2 nil "Indexing Users:")
-           (apply dom/ul #js {:id "indexing-users"}
-                  (om/build-all user-being-indexed users))))
+           (dom/table #js {:className "table table-striped table-bordered"}
+                      (dom/tr nil
+                              (dom/th nil "Screen Name"))
+                      (apply dom/tbody nil
+                             (om/build-all user-being-indexed users)))))
 
 ;; Indexing Controls UI
 
@@ -45,16 +59,16 @@
 ;; Indexing Start
 
 (defn index-user! [owner screen-name comm]
-  (.log js/console "the screen name is " screen-name)
   (om/set-state! owner :screen-name "")
-  (om/set-state! owner :users [screen-name])
+  (om/update-state! owner :users #(conj % screen-name))
   (acquire/data screen-name comm))
 
 ;; Indexing Complete
 
-(defn index-complete [owner val]
-  (.log js/console "user " val "has been indexed!")
-  (om/set-state! owner :users []))
+(defn index-complete [owner screen_name]
+  (.log js/console "user " screen_name "has been indexed!")
+  (get-indexed-users (om/root-cursor app-state))
+  (om/update-state! owner :users (fn [col] (vec (remove #(= % screen_name) col)))))
 
 ;; Event Dispatch
 
@@ -68,6 +82,7 @@
     :user-tweets (dp/init val comm)
     :user-indexed (index-complete owner val)
     nil))
+
 
 ;; UI Elements
 (defn user-to-index [owner state]
@@ -121,20 +136,11 @@
 (defn main-view [app-state owner state comm]
   (dom/div #js {:className "container"}
            (dom/h1 nil "Hoard")
-           ;; Display indexing status view
-           (users-being-indexed owner state)
            ;; Display the indexing form view
            (user-indexing-form owner state comm)
+           ;; Display indexing status view
+           (users-being-indexed owner state)
            (om/build users-in-index app-state)))
-
-(defn get-indexed-users [app-state]
-  (es/get-users
-   (fn [resp]
-     (let [tweet-data (array-seq (aget resp "aggregations" "screen_names" "buckets"))]
-       (.log js/console (aget (first tweet-data) "key"))
-       (om/update! app-state
-                     :indexed-users
-                     tweet-data)))))
 
 (defn indexing-ui [app-state owner]
   (reify

@@ -62,4 +62,5 @@
                                                   (js-obj "field"
                                                           "user.screen_name")))))
            (fn [err resp]
-             (cb resp))))
+             (if err (.log js/console err)
+                 (cb resp)))))

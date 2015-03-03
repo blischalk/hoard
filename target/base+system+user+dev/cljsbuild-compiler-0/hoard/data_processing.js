@@ -4,14 +4,14 @@ goog.require('cljs.core');
 goog.require('hoard.es_tweet_formatter');
 goog.require('hoard.elasticsearch');
 goog.require('cljs.core.async');
-hoard.data_processing.init = (function init(p__38262,ch){
-var vec__38264 = p__38262;
-var screen_name = cljs.core.nth.call(null,vec__38264,(0),null);
-var data = cljs.core.nth.call(null,vec__38264,(1),null);
-var more = cljs.core.nth.call(null,vec__38264,(2),null);
+hoard.data_processing.init = (function init(p__46764,ch){
+var vec__46766 = p__46764;
+var screen_name = cljs.core.nth.call(null,vec__46766,(0),null);
+var data = cljs.core.nth.call(null,vec__46766,(1),null);
+var more = cljs.core.nth.call(null,vec__46766,(2),null);
 console.log("Initializing data processing");
 
-return hoard.elasticsearch.bulk_insert.call(null,hoard.es_tweet_formatter.format_bulk_data.call(null,data),((function (vec__38264,screen_name,data,more){
+return hoard.elasticsearch.bulk_insert.call(null,hoard.es_tweet_formatter.format_bulk_data.call(null,data),((function (vec__46766,screen_name,data,more){
 return (function (err,resp){
 if(cljs.core.truth_(err)){
 return console.log("Elasticsearch gave an error: ",err);
@@ -24,6 +24,6 @@ return cljs.core.async.put_BANG_.call(null,ch,new cljs.core.PersistentVector(nul
 return null;
 }
 }
-});})(vec__38264,screen_name,data,more))
+});})(vec__46766,screen_name,data,more))
 );
 });
