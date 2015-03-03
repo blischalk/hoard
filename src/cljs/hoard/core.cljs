@@ -111,7 +111,7 @@
                     :className "section"}
                (dom/h2 nil "Indexed Users:")
                (.log js/console (:indexed-users app))
-               (dom/table #js {:className "table"}
+               (dom/table #js {:className "table table-striped table-bordered"}
                           (dom/tr nil
                                   (dom/th nil "Screen Name")
                                   (dom/th nil "Tweet Count"))
