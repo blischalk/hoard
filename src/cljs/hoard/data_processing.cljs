@@ -14,4 +14,6 @@
        (.log js/console "Elasticsearch gave an error: " err)
        (when (not more)
          (do (.log js/console "elastic search resp")
-             (put! ch [:user-indexed screen_name])))))))
+             (js/setTimeout (fn []
+                              (put! ch [:user-indexed screen_name]))
+                            2000)))))))

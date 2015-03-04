@@ -22,33 +22,18 @@
 (defonce app-state (atom {:indexed-users []}))
 
 
+;; Get the indexed users from es
 (defn get-indexed-users [app-state]
   (es/get-users
    (fn [resp]
-     (let [tweet-data (array-seq (aget resp "aggregations" "screen_names" "buckets"))]
+     (let [tweet-data (array-seq (aget resp
+                                       "aggregations"
+                                       "screen_names"
+                                       "buckets"))]
        (om/update! app-state
-                     :indexed-users
-                     tweet-data)))))
+                   :indexed-users
+                   tweet-data)))))
 
-;; Indexing Status UI
-(defn user-being-indexed [user owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/tr nil (dom/td nil user)))))
-
-(defn users-being-indexed [_ {:keys [users]}]
-  (dom/div #js {:style (util/hidden (empty? users))
-                :id "indexing-users"
-                :className "section"}
-           (dom/h2 nil "Indexing Users:")
-           (dom/table #js {:className "table table-striped table-bordered"}
-                      (dom/tr nil
-                              (dom/th nil "Screen Name"))
-                      (apply dom/tbody nil
-                             (om/build-all user-being-indexed users)))))
-
-;; Indexing Controls UI
 
 ;; Handlers
 (defn handle-screen-name-change [e owner {:keys [:screen-name]}]
@@ -84,7 +69,27 @@
     nil))
 
 
-;; UI Elements
+;; Indexing Status UI
+(defn user-being-indexed [user owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/tr nil (dom/td nil user)))))
+
+(defn users-being-indexed [_ {:keys [users]}]
+  (dom/div #js {:style (util/hidden (empty? users))
+                :id "indexing-users"
+                :className "section"}
+           (dom/h2 nil "Indexing Users:")
+           (dom/table #js {:className "table table-striped table-bordered"}
+                      (dom/tr nil
+                              (dom/th nil "Screen Name"))
+                      (apply dom/tbody nil
+                             (om/build-all user-being-indexed users)))))
+
+
+;; Indexing User UI
+
 (defn user-to-index [owner state]
   (dom/input #js {:type "text"
                   :className "form-control"
@@ -111,6 +116,9 @@
                     (dom/span #js {:className "input-group-btn"}
                               (indexing-submit owner state comm)))))
 
+
+;; Indexed users UI
+
 (defn indexed-user [user]
   (reify
     om/IRender
@@ -133,6 +141,8 @@
                           (apply dom/tbody nil
                                  (om/build-all indexed-user (:indexed-users app))))))))
 
+
+;; Main UI
 (defn main-view [app-state owner state comm]
   (dom/div #js {:className "container"}
            (dom/h1 nil "Hoard")
