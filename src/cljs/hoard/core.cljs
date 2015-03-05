@@ -1,12 +1,11 @@
 (ns hoard.core
   (:require [cljs.core.async :as async
-             :refer [chan put! chan <!]]
-            [enfocus.core :as ef]
-            [enfocus.events :as events]
-            [enfocus.effects :as effects]
+             :refer [chan <!]]
             [hoard.acquire :as acquire]
             [hoard.data-processing :as dp]
             [hoard.elasticsearch :as es]
+            [hoard.error-handling :as eh]
+            [hoard.health-check :as hc]
             [hoard.index-user :as iu]
             [hoard.indexed-users :as ius]
             [hoard.users-being-indexed :as ubi]
@@ -53,34 +52,16 @@
     :user-indexed (index-complete owner val)
     nil))
 
-
-;; Error UI
-
-(defn error-message [error owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/li nil error))))
-
-(defn check-es-status [comm]
-  (es/status comm (fn [_]
-                    (put! comm [:error (str "Can't connect to Elasticsearch.  "
-                                            "Is the server Running?")]))))
-
 ;; Main UI
 (defn main-view [app-state owner state comm]
-  (let [errors (:errors app-state)]
-    (dom/div #js {:className "container"}
-             (dom/h1 nil "Hoard")
-             (dom/div #js {:style (util/hidden (empty? errors))
-                           :className "section errors"}
-                      (apply dom/ul #js {:id "errors"}
-                             (om/build-all error-message errors)))
-             ;; Display the indexing form view
-             (iu/user-indexing-form owner state comm)
-             ;; Display indexing status view
-             (ubi/users-being-indexed owner state)
-             (om/build ius/users-in-index app-state))))
+  (dom/div #js {:className "container"}
+           (dom/h1 nil "Hoard")
+           (eh/error-flash app-state)
+           ;; Display the indexing form view
+           (iu/user-indexing-form owner state comm)
+           ;; Display indexing status view
+           (ubi/users-being-indexed owner state)
+           (om/build ius/users-in-index app-state)))
 
 (defn indexing-ui [app-state owner]
   (reify
@@ -92,7 +73,7 @@
         ;; for the various stages to give status updates
         (om/set-state! owner :comm comm)
 
-        (check-es-status comm)
+        (hc/analyze comm)
 
         ;; Listen for updates and dispatch accordingly
         (go

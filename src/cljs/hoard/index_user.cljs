@@ -1,6 +1,6 @@
 (ns hoard.index-user
   (:require [cljs.core.async :as async
-             :refer [chan put! chan <!]]
+             :refer [put!]]
             [om.core :as om]
             [om.dom :as dom]))
 
