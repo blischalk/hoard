@@ -13,8 +13,7 @@
             [om.core :as om]
             [om.dom :as dom]
             [weasel.repl :as repl])
-  (:require-macros [enfocus.macros :as em]
-                   [cljs.core.async.macros :refer [go]]))
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
 #_(when-not (repl/alive?)
   (repl/connect "ws://localhost:9001"))
