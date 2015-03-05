@@ -5,7 +5,7 @@
             [hoard.backup :as bkup]
             [hoard.twitter :as t]))
 
-(def load-sample-data? false)
+(def load-sample-data? true)
 
 (defn data [screen_name channel]
   (if load-sample-data?
