@@ -37,7 +37,7 @@
   [bulk-body cb]
   (.bulk client bulk-body cb))
 
-(defn query-es []
+(defn status [comm err-fn]
   (-> (.ping client
              (js-obj "requestTimeout" 1000
                      "hello" "elasticsearch!"))
@@ -45,7 +45,8 @@
                (.log js/console "booya!"))
              (fn [error]
                (if error
-                 (.log js/console "elasticsearch cluster is down!")
+                 (do (err-fn error)
+                     (.log js/console "Can't connect to Elasticsearch"))
                  (.log js/console "all is well"))))))
 
 

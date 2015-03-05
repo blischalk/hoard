@@ -19,7 +19,8 @@
 
 ;; App state
 
-(defonce app-state (atom {:indexed-users []}))
+(defonce app-state (atom {:indexed-users []
+                          :errors        []}))
 
 
 ;; Get the indexed users from es
@@ -38,7 +39,7 @@
 ;; Handlers
 (defn handle-screen-name-change [e owner {:keys [:screen-name]}]
   (let [value (.. e -target -value)]
-    (om/set-state! owner :btn-disabled (= value ""))
+    (om/set-state! owner :btn-disabled (or (= value "") (not (empty? errors))))
     (om/set-state! owner :screen-name value)))
 
 ;; Indexing Start
@@ -63,6 +64,7 @@
 ;; call for service requests directly
 (defn handle-event [type owner val comm]
   (case type
+    :error       (om/transact! (:errors (om/root-cursor app-state)) #(conj % val))
     :index-user  (index-user! owner val comm)
     :user-tweets (dp/init val comm)
     :user-indexed (index-complete owner val)
@@ -141,16 +143,33 @@
                           (apply dom/tbody nil
                                  (om/build-all indexed-user (:indexed-users app))))))))
 
+;; Error UI
+
+(defn error-message [error owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/li nil error))))
+
+(defn check-es-status [comm]
+  (es/status comm (fn [_]
+                    (put! comm [:error (str "Can't connect to Elasticsearch.  "
+                                            "Is the server Running?")]))))
 
 ;; Main UI
 (defn main-view [app-state owner state comm]
-  (dom/div #js {:className "container"}
-           (dom/h1 nil "Hoard")
-           ;; Display the indexing form view
-           (user-indexing-form owner state comm)
-           ;; Display indexing status view
-           (users-being-indexed owner state)
-           (om/build users-in-index app-state)))
+  (let [errors (:errors app-state)]
+    (dom/div #js {:className "container"}
+             (dom/h1 nil "Hoard")
+             (dom/div #js {:style (util/hidden (empty? errors))
+                           :className "section errors"}
+                      (apply dom/ul #js {:id "errors"}
+                             (om/build-all error-message errors)))
+             ;; Display the indexing form view
+             (user-indexing-form owner state comm)
+             ;; Display indexing status view
+             (users-being-indexed owner state)
+             (om/build users-in-index app-state))))
 
 (defn indexing-ui [app-state owner]
   (reify
@@ -161,6 +180,8 @@
         ;; When app starts up we setup a communication channel
         ;; for the various stages to give status updates
         (om/set-state! owner :comm comm)
+
+        (check-es-status comm)
 
         ;; Listen for updates and dispatch accordingly
         (go

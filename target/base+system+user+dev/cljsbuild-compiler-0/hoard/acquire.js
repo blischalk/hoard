@@ -5,7 +5,7 @@ goog.require('hoard.twitter');
 goog.require('hoard.backup');
 goog.require('cljs.nodejs');
 goog.require('cljs.core.async');
-hoard.acquire.load_sample_data_QMARK_ = true;
+hoard.acquire.load_sample_data_QMARK_ = false;
 hoard.acquire.data = (function data(screen_name,channel){
 if(cljs.core.truth_(hoard.acquire.load_sample_data_QMARK_)){
 return hoard.acquire.from_file.call(null,screen_name,channel);
