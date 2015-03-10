@@ -9,7 +9,7 @@
                  [com.cemerick/piggieback "0.1.5"]
                  [org.omcljs/om "0.8.8"]
                  [racehub/om-bootstrap "0.4.0"]
-                 [enfocus "2.1.1"]
+                 [secretary "1.2.1"]
                  [weasel "0.5.0"]]
   :source-paths ["src/clj"]
   :main ^:skip-aot hoard.core
