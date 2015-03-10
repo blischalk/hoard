@@ -23,10 +23,12 @@
 
 (defn indexing-submit [owner state comm]
   (dom/button
-   #js {:onClick #(put! comm
-                        [:index-user (-> (om/get-node owner
-                                                      "user-to-index")
-                                         .-value)])
+   #js {:onClick (fn [] (put! comm
+                              [:index-user (-> (om/get-node owner
+                                                            "user-to-index")
+                                               .-value)])
+                   (om/set-state! owner :btn-disabled true)
+                   (om/set-state! owner :screen-name ""))
         :className "btn btn-primary"
         :disabled (:btn-disabled state)}
    "Index User"))
