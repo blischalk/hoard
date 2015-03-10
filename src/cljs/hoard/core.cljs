@@ -2,6 +2,7 @@
   (:require [cljs.core.async :as async
              :refer [chan <!]]
             [hoard.acquire :as acquire]
+            [hoard.config :as config]
             [hoard.data-processing :as dp]
             [hoard.elasticsearch :as es]
             [hoard.error-handling :as eh]
@@ -12,11 +13,13 @@
             [hoard.util :as util]
             [om.core :as om]
             [om.dom :as dom]
+            [secretary.core :as secretary :refer-macros [defroute]]
             [weasel.repl :as repl])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 #_(when-not (repl/alive?)
   (repl/connect "ws://localhost:9001"))
+
 
 ;; App state
 
@@ -53,8 +56,7 @@
 
 ;; Main UI
 (defn main-view [app-state owner state comm]
-  (dom/div #js {:className "container"}
-           (dom/h1 nil "Hoard")
+  (dom/div nil
            (eh/error-flash app-state)
            ;; Display the indexing form view
            (iu/user-indexing-form owner state comm)
@@ -91,5 +93,42 @@
       ;; Display the view
       (main-view app-state owner state comm))))
 
-(om/root indexing-ui app-state
-  {:target (. js/document (getElementById "my-app"))})
+(defn main-nav [app-state owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/nav #js {:role "navigation"
+                    :className "navbar navbar-default section"}
+               (dom/ul #js {:className "nav nav-pills"}
+                       (dom/li #js {:className "active"}
+                               (dom/a #js {:href "#"
+                                           :onClick (fn [_]
+                                                      (secretary/dispatch! (indexing-path)))} "Index User"))
+                       (dom/li #js {:className ""}
+                               (dom/a #js {:href "#"
+                                           :onClick (fn [_]
+                                                      (secretary/dispatch! (config/config-path)))} "Config")))))))
+
+
+(defn global-ui [app-state owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div #js {:className "container"}
+
+               (dom/h1 nil "Hoard")
+               (om/build main-nav app-state)
+               (dom/div #js {:id "main-content"})))))
+
+(om/root global-ui app-state
+    {:target (. js/document (getElementById "app"))})
+
+
+;; Routing
+
+(defroute indexing-path "/" []
+  (om/root indexing-ui app-state
+    {:target (. js/document (getElementById "main-content"))}))
+
+
+(secretary/dispatch! (indexing-path))
