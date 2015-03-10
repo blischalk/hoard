@@ -22,5 +22,6 @@
                                    :optimizations :whitespace
                                    :pretty-print true } }] }
   :node-webkit-build {:root "resources/public"
-                      :name "hoard"}
+                      :name "hoard"
+                      :nw-version "0.11.6"}
   :profiles {:uberjar {:aot :all}})
