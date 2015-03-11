@@ -23,7 +23,7 @@
 
 (defn index-complete [owner screen_name]
   (.log js/console "user " screen_name "has been indexed!")
-  (ius/get-indexed-users (om/root-cursor app-state))
+  (ius/get-indexed-users (om/root-cursor hoard.core/app-state))
   (om/update-state! owner :users (fn [col] (vec (remove #(= % screen_name) col)))))
 
 ;; Event Dispatch
