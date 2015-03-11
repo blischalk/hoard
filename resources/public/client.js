@@ -81754,11 +81754,9 @@ weasel.repl.connect = function() {
 }();
 goog.provide("hoard.core");
 goog.require("cljs.core");
-goog.require("secretary.core");
 goog.require("weasel.repl");
-goog.require("cljs.core.async");
-goog.require("hoard.global_ui");
 goog.require("hoard.index_user");
+goog.require("hoard.global_ui");
 if (typeof hoard.core.app_state !== "undefined") {
 } else {
   hoard.core.app_state = cljs.core.atom.call(null, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "indexed-users", "indexed-users", -2071128862), cljs.core.PersistentVector.EMPTY, new cljs.core.Keyword(null, "errors", "errors", -908790718), cljs.core.PersistentVector.EMPTY], null));

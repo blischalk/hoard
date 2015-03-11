@@ -1,9 +1,6 @@
 (ns hoard.core
-  (:require [cljs.core.async :as async
-             :refer [chan]]
-            [hoard.global-ui :as gui]
+  (:require [hoard.global-ui :as gui]
             [hoard.index-user :as iu]
-            [secretary.core :as secretary :refer-macros [defroute]]
             [weasel.repl :as repl]))
 
 #_(when-not (repl/alive?)
