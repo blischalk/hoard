@@ -1,8 +1,6 @@
 (ns hoard.core
   (:require [cljs.core.async :as async
              :refer [put! chan <!]]
-            [goog.events :as events]
-            [goog.history.EventType :as EventType]
             [hoard.acquire :as acquire]
             [hoard.config :as config]
             [hoard.data-processing :as dp]
@@ -163,12 +161,4 @@
     {:target (. js/document (getElementById "app"))})
 
 
-;; Routing
-
-
-
-(secretary/set-config! :prefix "#")
-(let [h (History.)]
-  (goog.events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
-  (doto h (.setEnabled true)))
 (secretary/dispatch! (indexing-path))
