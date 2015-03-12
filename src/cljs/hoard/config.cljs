@@ -11,5 +11,25 @@
   (reify
     om/IRender
     (render [_]
-      (dom/div nil
-               "Config UI Here!"))))
+      (dom/div #js {:id "app-config"
+                    :className "section"}
+               (dom/div #js {:className ""}
+                        (dom/input #js {:type "text"
+                                        :className "form-control"
+                                        :placeholder "Twitter Consumer Key"})
+                        (dom/input #js {:type "text"
+                                        :className "form-control"
+                                        :placeholder "Twitter Consumer Secret"})
+                        (dom/input #js {:type "text"
+                                        :className "form-control"
+                                        :placeholder "Twitter Access Token Key"})
+                        (dom/input #js {:type "text"
+                                        :className "form-control"
+                                        :placeholder "Twitter Access Token Secret"})
+                        (dom/span #js {:className ""}
+                                  (dom/button
+                                   #js {:onClick (fn []
+                                                   (.log js/console "Saving Configuration."))
+                                        :className "btn btn-primary"
+                                        :disabled (:btn-disabled state)}
+                                   "Save Configuration")))))))
