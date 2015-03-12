@@ -7,6 +7,7 @@
             [hoard.error-handling :as eh]
             [hoard.health-check :as hc]
             [hoard.indexed-users :as ius]
+            [hoard.state :as state]
             [hoard.users-being-indexed :as ubi]
             [secretary.core :as secretary :refer-macros [defroute]]
             [om.core :as om]
@@ -23,7 +24,7 @@
 
 (defn index-complete [owner screen_name]
   (.log js/console "user " screen_name "has been indexed!")
-  (ius/get-indexed-users (om/root-cursor hoard.core/app-state))
+  (ius/get-indexed-users (om/root-cursor state/app-state))
   (om/update-state! owner :users (fn [col] (vec (remove #(= % screen_name) col)))))
 
 ;; Event Dispatch
@@ -34,7 +35,7 @@
 ;; call for service requests directly
 (defn handle-event [type owner val comm]
   (case type
-    :error       (om/transact! (:errors (om/root-cursor hoard.core/app-state)) #(conj % val))
+    :error       (om/transact! (:errors (om/root-cursor state/app-state)) #(conj % val))
     :index-user  (index-user! owner val comm)
     :user-tweets (dp/init val comm)
     :user-indexed (index-complete owner val)
@@ -119,7 +120,7 @@
 
 
 (defroute indexing-path "/" []
-  (om/root indexing-ui hoard.core/app-state
+  (om/root indexing-ui state/app-state
     {:target (. js/document (getElementById "main-content"))}))
 
 (defn init [] (secretary/dispatch! (indexing-path)))

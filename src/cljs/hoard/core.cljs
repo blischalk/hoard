@@ -1,15 +1,12 @@
 (ns hoard.core
   (:require [hoard.global-ui :as gui]
             [hoard.index-user :as iu]
+            [hoard.state :as state]
             [weasel.repl :as repl]))
 
 #_(when-not (repl/alive?)
   (repl/connect "ws://localhost:9001"))
 
-;; App state
-
-(defonce app-state (atom {:indexed-users []
-                          :errors        []}))
 
 ;; Initialize UI
 
