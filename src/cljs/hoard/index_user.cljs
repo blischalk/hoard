@@ -17,7 +17,7 @@
 
 (defn index-user! [owner screen-name comm]
   (om/set-state! owner :screen-name "")
-  (om/update-state! owner :users #(conj % screen-name))
+  (om/transact! (om/root-cursor state/app-state) :indexing-users #(conj % screen-name))
   (acquire/data screen-name comm))
 
 ;; Indexing Complete
@@ -25,7 +25,9 @@
 (defn index-complete [owner screen_name]
   (.log js/console "user " screen_name "has been indexed!")
   (ius/get-indexed-users (om/root-cursor state/app-state))
-  (om/update-state! owner :users (fn [col] (vec (remove #(= % screen_name) col)))))
+  (om/transact! (om/root-cursor state/app-state)
+                :indexing-users
+                (fn [col] (vec (remove #(= % screen_name) col)))))
 
 ;; Event Dispatch
 
@@ -86,7 +88,7 @@
            ;; Display the indexing form view
            (user-indexing-form owner state comm)
            ;; Display indexing status view
-           (ubi/users-being-indexed owner state)
+           (om/build ubi/users-being-indexed (:indexing-users app-state))
            (om/build ius/users-in-index app-state)))
 
 (defn indexing-ui [app-state owner]
@@ -111,8 +113,7 @@
     ;; Setup our initial UI state
     (init-state [_]
       {:screen-name ""
-       :btn-disabled true
-       :users []})
+       :btn-disabled true})
     om/IRenderState
     (render-state [this {:keys [comm] :as state}]
       ;; Display the view
