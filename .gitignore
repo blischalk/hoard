@@ -1,4 +1,6 @@
 resources/public/tweets.*
+resources/public/twitter-credentials
+resources/public/twitter
 tmp
 target
 releases
