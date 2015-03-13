@@ -4,4 +4,8 @@
 
 (defonce app-state (atom {:indexed-users []
                           :indexing-users []
-                          :errors        []}))
+                          :errors        []
+                          :twitter-credentials {:consumer-key "asdf"
+                                                :consumer-secret ""
+                                                :access-token-key ""
+                                                :access-token-secret ""}}))
