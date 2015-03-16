@@ -1,5 +1,7 @@
 (ns hoard.indexed-users
-  (:require [hoard.elasticsearch :as es]
+  (:require [cljs.core.async :as async
+             :refer [put!]]
+            [hoard.elasticsearch :as es]
             [om.dom :as dom]
             [om.core :as om]))
 
@@ -31,7 +33,6 @@
       (dom/div #js {:id "indexed-users"
                     :className "section"}
                (dom/h2 nil "Indexed Users:")
-               (.log js/console (:indexed-users app))
                (dom/table #js {:className "table table-striped table-bordered"}
                           (dom/tr nil
                                   (dom/th nil "Screen Name")

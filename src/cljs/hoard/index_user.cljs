@@ -5,6 +5,7 @@
             [hoard.acquire :as acquire]
             [hoard.data-processing :as dp]
             [hoard.error-handling :as eh]
+            [hoard.es-tweet-formatter :as estf]
             [hoard.health-check :as hc]
             [hoard.indexed-users :as ius]
             [hoard.state :as state]
@@ -22,7 +23,7 @@
 
 ;; Indexing Complete
 
-(defn index-complete [owner screen_name]
+(defn index-complete [owner screen_name comm]
   (.log js/console "user " screen_name "has been indexed!")
   (ius/get-indexed-users (om/root-cursor state/app-state))
   (om/transact! (om/root-cursor state/app-state)
@@ -40,7 +41,7 @@
     :error       (om/transact! (:errors (om/root-cursor state/app-state)) #(conj % val))
     :index-user  (index-user! owner val comm)
     :user-tweets (dp/init val comm)
-    :user-indexed (index-complete owner val)
+    :user-indexed (index-complete owner val comm)
     nil))
 
 ;; Handlers
@@ -81,6 +82,50 @@
                     (dom/span #js {:className "input-group-btn"}
                               (indexing-submit owner state comm)))))
 
+(defn user-graph [app-state owner]
+  (reify
+    om/IRenderState
+    (render-state [this state]
+      (dom/div #js {:id "user-graph"
+                    :className "section"}
+               (let [rows (.-value (:indexed-users app-state))
+                     graph (dom/svg #js {:className "chart"})]
+                 (if (not-empty rows)
+                   (let [data (-> (map #(aget % "doc_count") rows)
+                                  vec
+                                  sort
+                                  clj->js)
+                         width 420
+                         barHeight 20
+                         x (-> js/d3
+                               .-scale
+                               .linear
+                               (.domain (clj->js [0 (.max js/d3 data)]))
+                               (.range (clj->js [0 width])))
+                         chart (-> js/d3
+                                   (.select ".chart")
+                                   (.attr "width" width)
+                                   (.attr "height" (* barHeight (count data))))
+                         bar (-> chart
+                                 (.selectAll "g")
+                                 (.data data)
+                                 .enter
+                                 (.append "g")
+                                 (.attr "transform"
+                                        (fn [d i]
+                                          (str "translate(0," (* i barHeight) ")"))))
+                         _ (-> bar
+                               (.append "rect")
+                               (.attr "width" x)
+                               (.attr "height" (- barHeight 1)))
+                         _ (-> bar
+                               (.append "text")
+                               (.attr "x" (fn [d] (- (x d) 3)))
+                               (.attr "y" (/ barHeight 2))
+                               (.attr "dy" ".35em")
+                               (.text (fn [d] d)))]))
+                 graph)))))
+
 ;; Main UI
 (defn main-view [app-state owner state comm]
   (dom/div nil
@@ -89,7 +134,8 @@
            (user-indexing-form owner state comm)
            ;; Display indexing status view
            (om/build ubi/users-being-indexed (:indexing-users app-state))
-           (om/build ius/users-in-index app-state)))
+           (om/build ius/users-in-index app-state)
+           (om/build user-graph app-state)))
 
 (defn indexing-ui [app-state owner]
   (reify
