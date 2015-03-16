@@ -95,17 +95,21 @@
                                   vec
                                   sort
                                   clj->js)
-                         width 420
-                         barHeight 20
-                         x (-> js/d3
+                         width 960
+                         height 500
+                         y (-> js/d3
                                .-scale
                                .linear
-                               (.domain (clj->js [0 (.max js/d3 data)]))
-                               (.range (clj->js [0 width])))
+                               (.range (clj->js [height 0])))
+                         _ (.domain y (clj->js [0 (.max js/d3
+                                                        data
+                                                        (fn [d] d))]))
+                         barWidth (/ width (.-length data))
                          chart (-> js/d3
                                    (.select ".chart")
                                    (.attr "width" width)
-                                   (.attr "height" (* barHeight (count data))))
+                                   (.attr "height" height))
+
                          bar (-> chart
                                  (.selectAll "g")
                                  (.data data)
@@ -113,16 +117,18 @@
                                  (.append "g")
                                  (.attr "transform"
                                         (fn [d i]
-                                          (str "translate(0," (* i barHeight) ")"))))
+                                          (str "translate(" (* i barWidth) ", 0)"))))
                          _ (-> bar
                                (.append "rect")
-                               (.attr "width" x)
-                               (.attr "height" (- barHeight 1)))
+                               (.attr "y" (fn [d] (y d)))
+                               (.attr "width" (- barWidth 1))
+                               (.attr "height" (fn [d] (- height (y d)))))
+
                          _ (-> bar
                                (.append "text")
-                               (.attr "x" (fn [d] (- (x d) 3)))
-                               (.attr "y" (/ barHeight 2))
-                               (.attr "dy" ".35em")
+                               (.attr "x" (/ barWidth 2))
+                               (.attr "y" (fn [d] (+ 3 (y d))))
+                               (.attr "dy" ".75em")
                                (.text (fn [d] d)))]))
                  graph)))))
 
