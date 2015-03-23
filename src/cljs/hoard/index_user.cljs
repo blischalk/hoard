@@ -91,45 +91,49 @@
                (let [rows (.-value (:indexed-users app-state))
                      graph (dom/svg #js {:className "chart"})]
                  (if (not-empty rows)
-                   (let [data (-> (map #(aget % "doc_count") rows)
-                                  vec
-                                  sort
-                                  clj->js)
-                         width 960
-                         height 500
-                         y (-> js/d3
-                               .-scale
-                               .linear
-                               (.range (clj->js [height 0])))
-                         _ (.domain y (clj->js [0 (.max js/d3
-                                                        data
-                                                        (fn [d] d))]))
-                         barWidth (/ width (.-length data))
+                   (let [data (clj->js rows)
+                         counts (clj->js (vec (map #(aget % "doc_count") data)))
+                         names (clj->js (vec (map #(aget % "key") data)))
+                         margin {:top 20 :right 30 :bottom 30 :left 40}
+                         width (- 960 (:left margin) (:right margin))
+                         height (- 500 (:top margin) (:bottom margin))
+
+                         x (.rangeRoundBands (.ordinal js/d3.scale)  (clj->js [0 width]) 0.1)
+
+
+                         y (.range (.linear js/d3.scale) (clj->js [height 0]))
+                         _ (.domain y (clj->js [0 (js/d3.max counts)]))
+                         _ (.domain x names)
+
+                         xAxis (.orient (.scale (.axis js/d3.svg) x) "bottom")
+
+                         yAxis (.orient (.scale (.axis js/d3.svg) y) "left")
+
                          chart (-> js/d3
                                    (.select ".chart")
-                                   (.attr "width" width)
-                                   (.attr "height" height))
+                                   (.attr "width" (+ width (:left margin) (:right margin)))
+                                   (.attr "height" (+ height (:top margin) (:bottom margin))))
+                         chart (.attr (.append chart "g") "transform" (str "translate(" (:left margin) "," (:top margin) ")") )
+                         ]
+                     (-> (.append chart "g")
+                         (.attr "class" "x axis")
+                         (.attr "transform" (str "translate(0," height ")"))
+                         (.call xAxis))
 
-                         bar (-> chart
-                                 (.selectAll "g")
-                                 (.data data)
-                                 .enter
-                                 (.append "g")
-                                 (.attr "transform"
-                                        (fn [d i]
-                                          (str "translate(" (* i barWidth) ", 0)"))))
-                         _ (-> bar
-                               (.append "rect")
-                               (.attr "y" (fn [d] (y d)))
-                               (.attr "width" (- barWidth 1))
-                               (.attr "height" (fn [d] (- height (y d)))))
+                     _ (.call (.attr (.append chart "g") "class" "y axis") yAxis)
 
-                         _ (-> bar
-                               (.append "text")
-                               (.attr "x" (/ barWidth 2))
-                               (.attr "y" (fn [d] (+ 3 (y d))))
-                               (.attr "dy" ".75em")
-                               (.text (fn [d] d)))]))
+                     (-> (-> chart
+                             (.selectAll ".bar")
+                             (.data data)
+                             .enter
+                             (.append "rect"))
+                         (.attr "class" "bar")
+                         (.attr "x" (fn [d] (x (aget d "key"))))
+                         (.attr "y" (fn [d] (y (aget d "doc_count"))))
+                         (.attr "height" (fn [d] (- height (y (aget d "doc_count")))))
+                         (.attr "width" (.rangeBand x)))
+                     (.log js/console "..........." (.rangeBand x))
+))
                  graph)))))
 
 ;; Main UI
