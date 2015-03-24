@@ -2,11 +2,7 @@
   (:require [cljs.nodejs :as node]
             [hoard.config :as cfg]
             [hoard.global-ui :as gui]
-            [hoard.index-user :as iu]
-            [weasel.repl :as repl]))
-
-#_(when-not (repl/alive?)
-  (repl/connect "ws://localhost:9001"))
+            [hoard.index-user :as iu]))
 
 ;; Enable Edit menu so copy and paste work
 
@@ -15,8 +11,6 @@
   (let [mb (gui.Menu. (clj->js {:type "menubar"}))]
     (.createMacBuiltin mb "Hoard" (clj->js {:hideEdit false}))
     (set! (.-menu (.get gui.Window)) mb)))
-
-
 
 
 ;; Initialize UI
