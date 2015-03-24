@@ -93,7 +93,9 @@
 
 (defn build-graph [rows]
   ;; Place shared info in let bindings
-  (let [data (clj->js rows)
+  (let [svg (.select js/d3 "#user-graph-chart")
+        container (js/d3.select (.-parentNode (.node svg)))
+        data (clj->js rows)
         counts (js->map->field->js "doc_count" data)
         names (js->map->field->js "key" data)
         margin {:top 20 :right 30 :bottom 30 :left 40}
@@ -101,6 +103,7 @@
         width-plus-margins (+ width (:left margin) (:right margin))
         height (- 500 (:top margin) (:bottom margin))
         height-plus-margins (+ height (:top margin) (:bottom margin))
+        aspect (/ width-plus-margins height-plus-margins)
         x (.rangeRoundBands (.ordinal js/d3.scale)  (clj->js [0 width]) 0.1)
         y (.range (.linear js/d3.scale) (clj->js [height 0]))
         _ (.domain y (clj->js [0 (js/d3.max counts)]))
@@ -110,7 +113,9 @@
         chart (.. js/d3
                   (select ".chart")
                   (attr "width" width-plus-margins)
-                  (attr "height" height-plus-margins))
+                  (attr "height" height-plus-margins)
+                  (attr "viewBox" (str "0 0 " width-plus-margins " " height-plus-margins))
+                  (attr "perserveAspectRatio" "xMinYMid"))
         ;; Create main grouping
         grouping (.. chart
                      (append "g")
@@ -144,7 +149,15 @@
     (.. grouping
         (append "g")
         (attr "class" "y axis")
-        (call yAxis))))
+        (call yAxis))
+
+    ;; Setup resizing
+    (.on (.select js/d3 js/window)
+         (str "resize." (.attr container "id"))
+         (fn []
+           (let [targetWidth (js/parseInt (.style container "width"))]
+             (.attr svg "width" targetWidth)
+             (.attr svg "height" (js/Math.round (/ targetWidth aspect))))))))
 
 (defn user-graph [app-state owner]
   (reify
@@ -153,7 +166,8 @@
       (dom/div #js {:id "user-graph"
                     :className "section"}
                (let [rows (.-value (:indexed-users app-state))
-                     graph (dom/svg #js {:className "chart"})]
+                     graph (dom/svg #js {:className "chart"
+                                         :id "user-graph-chart"})]
                  (when (not-empty rows) (build-graph rows))
                  graph)))))
 
