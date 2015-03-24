@@ -82,34 +82,44 @@
                     (dom/span #js {:className "input-group-btn"}
                               (indexing-submit owner state comm)))))
 
+
+(defn js->map->js [fnk col]
+  (clj->js (vec (map fnk col))))
+
+
+(defn js->map->field->js [field col]
+  (js->map->js #(aget % field) col))
+
+
 (defn build-graph [rows]
+  ;; Place shared info in let bindings
   (let [data (clj->js rows)
-        counts (clj->js (vec (map #(aget % "doc_count") data)))
-        names (clj->js (vec (map #(aget % "key") data)))
+        counts (js->map->field->js "doc_count" data)
+        names (js->map->field->js "key" data)
         margin {:top 20 :right 30 :bottom 30 :left 40}
         width (- 960 (:left margin) (:right margin))
+        width-plus-margins (+ width (:left margin) (:right margin))
         height (- 500 (:top margin) (:bottom margin))
+        height-plus-margins (+ height (:top margin) (:bottom margin))
         x (.rangeRoundBands (.ordinal js/d3.scale)  (clj->js [0 width]) 0.1)
         y (.range (.linear js/d3.scale) (clj->js [height 0]))
         _ (.domain y (clj->js [0 (js/d3.max counts)]))
         _ (.domain x names)
-        xAxis (.orient (.scale (.axis js/d3.svg) x) "bottom")
-        yAxis (.orient (.scale (.axis js/d3.svg) y) "left")
-        chart (-> js/d3
-                  (.select ".chart")
-                  (.attr "width" (+ width (:left margin) (:right margin)))
-                  (.attr "height" (+ height (:top margin) (:bottom margin))))
+        xAxis (.. js/d3.svg axis (scale x) (orient "bottom"))
+        yAxis (.. js/d3.svg axis (scale y) (orient "left"))
+        chart (.. js/d3
+                  (select ".chart")
+                  (attr "width" width-plus-margins)
+                  (attr "height" height-plus-margins))
         ;; Create main grouping
-        grouping (.attr (.append chart "g") "transform" (str "translate(" (:left margin) "," (:top margin) ")") )]
-
-    ;; Create grouping for x axis after main grouping
-    (-> (.append grouping "g")
-        (.attr "class" "x axis")
-        (.attr "transform" (str "translate(0," height ")"))
-        (.call xAxis))
-
-    ;; Create grouping for y axis after main grouping
-    (.call (.attr (.append grouping "g") "class" "y axis") yAxis)
+        grouping (.. chart
+                     (append "g")
+                     (attr "transform"
+                           (str "translate("
+                                (:left margin)
+                                ","
+                                (:top margin)
+                                ")")))]
 
     ;; Add bar chart data inside main grouping
     (-> (-> grouping
@@ -121,7 +131,20 @@
         (.attr "x" (fn [d] (x (aget d "key"))))
         (.attr "y" (fn [d] (y (aget d "doc_count"))))
         (.attr "height" (fn [d] (- height (y (aget d "doc_count")))))
-        (.attr "width" (.rangeBand x)))))
+        (.attr "width" (.rangeBand x)))
+
+    ;; Create grouping for x axis inside main grouping
+    (.. grouping
+        (append "g")
+        (attr "class" "x axis")
+        (attr "transform" (str "translate(0," height ")"))
+        (call xAxis))
+
+    ;; Create grouping for y axis inside main grouping
+    (.. grouping
+        (append "g")
+        (attr "class" "y axis")
+        (call yAxis))))
 
 (defn user-graph [app-state owner]
   (reify
