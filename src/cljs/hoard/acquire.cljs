@@ -29,10 +29,12 @@
       (if error
         (.log js/console error)
         (let [js-data (js->clj tweets)
-              cnt (.-length js-data)
-              last-tweet-id (aget js-data (- cnt 1) "id")]
+              cnt (.-length js-data)]
           ;; Keep recursively calling for more tweets until we get them all
-          (if (not (= last-tweet-id max_id))
-            (do (put! channel [:user-tweets [screen_name tweets true]])
-              (from-twitter screen_name channel last-tweet-id))
-            (put! channel [:user-tweets [screen_name tweets false]]))))))))
+          (if (> cnt 0)
+            (let [last-tweet-id (aget js-data (- cnt 1) "id")]
+              (if (not (= last-tweet-id max_id))
+                (do (put! channel [:user-tweets [screen_name tweets true]])
+                    (from-twitter screen_name channel last-tweet-id))
+                (put! channel [:user-tweets [screen_name tweets false]])))
+            (put! channel [:user-indexed screen_name]))))))))
