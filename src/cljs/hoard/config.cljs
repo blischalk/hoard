@@ -18,15 +18,16 @@
 (defn get-twitter-config [app-state]
   (tdb/get-twitter-credentials
    (fn [err result]
-     (.log js/console "Found results!!!" result)
-     (.log js/console "A result: " (aget result "credentials" "consumer-key"))
-     (om/update! app-state
-                 [:twitter-credentials]
-                 {:consumer-key (aget result "credentials" "consumer-key")
-                  :consumer-secret (aget result "credentials" "consumer-secret")
-                  :access-token-key (aget result "credentials" "access-token-key")
-                  :access-token-secret (aget result "credentials" "access-token-secret")})
-     (.log js/console app-state))))
+     (when result
+       (.log js/console "Found results!!!" result)
+       (.log js/console "A result: " (aget result "credentials" "consumer-key"))
+       (om/update! app-state
+                   [:twitter-credentials]
+                   {:consumer-key (aget result "credentials" "consumer-key")
+                    :consumer-secret (aget result "credentials" "consumer-secret")
+                    :access-token-key (aget result "credentials" "access-token-key")
+                    :access-token-secret (aget result "credentials" "access-token-secret")})
+       (.log js/console app-state)))))
 
 (defn config-ui [app-state owner]
   (reify

@@ -82,6 +82,47 @@
                     (dom/span #js {:className "input-group-btn"}
                               (indexing-submit owner state comm)))))
 
+(defn build-graph [rows]
+  (let [data (clj->js rows)
+        counts (clj->js (vec (map #(aget % "doc_count") data)))
+        names (clj->js (vec (map #(aget % "key") data)))
+        margin {:top 20 :right 30 :bottom 30 :left 40}
+        width (- 960 (:left margin) (:right margin))
+        height (- 500 (:top margin) (:bottom margin))
+        x (.rangeRoundBands (.ordinal js/d3.scale)  (clj->js [0 width]) 0.1)
+        y (.range (.linear js/d3.scale) (clj->js [height 0]))
+        _ (.domain y (clj->js [0 (js/d3.max counts)]))
+        _ (.domain x names)
+        xAxis (.orient (.scale (.axis js/d3.svg) x) "bottom")
+        yAxis (.orient (.scale (.axis js/d3.svg) y) "left")
+        chart (-> js/d3
+                  (.select ".chart")
+                  (.attr "width" (+ width (:left margin) (:right margin)))
+                  (.attr "height" (+ height (:top margin) (:bottom margin))))
+        ;; Create main grouping
+        grouping (.attr (.append chart "g") "transform" (str "translate(" (:left margin) "," (:top margin) ")") )]
+
+    ;; Create grouping for x axis after main grouping
+    (-> (.append grouping "g")
+        (.attr "class" "x axis")
+        (.attr "transform" (str "translate(0," height ")"))
+        (.call xAxis))
+
+    ;; Create grouping for y axis after main grouping
+    (.call (.attr (.append grouping "g") "class" "y axis") yAxis)
+
+    ;; Add bar chart data inside main grouping
+    (-> (-> grouping
+            (.selectAll ".bar")
+            (.data data)
+            .enter
+            (.append "rect"))
+        (.attr "class" "bar")
+        (.attr "x" (fn [d] (x (aget d "key"))))
+        (.attr "y" (fn [d] (y (aget d "doc_count"))))
+        (.attr "height" (fn [d] (- height (y (aget d "doc_count")))))
+        (.attr "width" (.rangeBand x)))))
+
 (defn user-graph [app-state owner]
   (reify
     om/IRenderState
@@ -90,50 +131,7 @@
                     :className "section"}
                (let [rows (.-value (:indexed-users app-state))
                      graph (dom/svg #js {:className "chart"})]
-                 (if (not-empty rows)
-                   (let [data (clj->js rows)
-                         counts (clj->js (vec (map #(aget % "doc_count") data)))
-                         names (clj->js (vec (map #(aget % "key") data)))
-                         margin {:top 20 :right 30 :bottom 30 :left 40}
-                         width (- 960 (:left margin) (:right margin))
-                         height (- 500 (:top margin) (:bottom margin))
-
-                         x (.rangeRoundBands (.ordinal js/d3.scale)  (clj->js [0 width]) 0.1)
-
-
-                         y (.range (.linear js/d3.scale) (clj->js [height 0]))
-                         _ (.domain y (clj->js [0 (js/d3.max counts)]))
-                         _ (.domain x names)
-
-                         xAxis (.orient (.scale (.axis js/d3.svg) x) "bottom")
-
-                         yAxis (.orient (.scale (.axis js/d3.svg) y) "left")
-
-                         chart (-> js/d3
-                                   (.select ".chart")
-                                   (.attr "width" (+ width (:left margin) (:right margin)))
-                                   (.attr "height" (+ height (:top margin) (:bottom margin))))
-                         chart (.attr (.append chart "g") "transform" (str "translate(" (:left margin) "," (:top margin) ")") )
-                         ]
-                     (-> (.append chart "g")
-                         (.attr "class" "x axis")
-                         (.attr "transform" (str "translate(0," height ")"))
-                         (.call xAxis))
-
-                     _ (.call (.attr (.append chart "g") "class" "y axis") yAxis)
-
-                     (-> (-> chart
-                             (.selectAll ".bar")
-                             (.data data)
-                             .enter
-                             (.append "rect"))
-                         (.attr "class" "bar")
-                         (.attr "x" (fn [d] (x (aget d "key"))))
-                         (.attr "y" (fn [d] (y (aget d "doc_count"))))
-                         (.attr "height" (fn [d] (- height (y (aget d "doc_count")))))
-                         (.attr "width" (.rangeBand x)))
-                     (.log js/console "..........." (.rangeBand x))
-))
+                 (when (not-empty rows) (build-graph rows))
                  graph)))))
 
 ;; Main UI
