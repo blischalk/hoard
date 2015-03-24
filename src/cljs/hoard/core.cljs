@@ -1,17 +1,33 @@
 (ns hoard.core
-  (:require [hoard.global-ui :as gui]
+  (:require [cljs.nodejs :as node]
+            [hoard.config :as cfg]
+            [hoard.global-ui :as gui]
             [hoard.index-user :as iu]
-            [hoard.state :as state]
             [weasel.repl :as repl]))
 
 #_(when-not (repl/alive?)
   (repl/connect "ws://localhost:9001"))
 
+;; Enable Edit menu so copy and paste work
+
+(def gui (js/require "nw.gui"))
+(when (= process.platform "darwin")
+  (let [mb (gui.Menu. (clj->js {:type "menubar"}))]
+    (.createMacBuiltin mb "RoboPaint" (clj->js {:hideEdit false}))
+    (set! (.-menu (.get gui.Window)) mb)))
+
+
+
 
 ;; Initialize UI
 
-;; Add global UI
-(gui/init)
+(cfg/init
+ (fn []
+   ;; Add global UI
 
-;; Initialize the indexing UI
-(iu/init)
+   (gui/init)
+
+   ;; Initialize the indexing UI
+
+
+   (iu/init)))
