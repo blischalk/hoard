@@ -13,9 +13,10 @@
                                        "aggregations"
                                        "screen_names"
                                        "buckets"))]
-       (om/update! app-state
-                   :indexed-users
-                   tweet-data)))))
+       (when tweet-data
+         (om/update! app-state
+                     :indexed-users
+                     tweet-data))))))
 
 ;; Indexed users UI
 
