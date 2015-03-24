@@ -32,30 +32,42 @@
       (dom/div #js {:id "app-config"
                     :className "section"}
                (dom/div #js {:className ""}
-                        (dom/input #js {:type "text"
-                                        :ref "consumer_key"
-                                        :className "form-control"
-                                        :placeholder "Twitter Consumer Key"
-                                        :value (:consumer_key (:twitter-credentials app-state))
-                                        :onChange #(set-config-state % app-state :consumer_key)})
-                        (dom/input #js {:type "text"
-                                        :ref "consumer_secret"
-                                        :className "form-control"
-                                        :placeholder "Twitter Consumer Secret"
-                                        :value (:consumer_secret (:twitter-credentials app-state))
-                                        :onChange #(set-config-state % app-state :consumer_secret)})
-                        (dom/input #js {:type "text"
-                                        :ref "access_token_key"
-                                        :className "form-control"
-                                        :placeholder "Twitter Access Token Key"
-                                        :value (:access_token_key (:twitter-credentials app-state))
-                                        :onChange #(set-config-state % app-state :access_token_key)})
-                        (dom/input #js {:type "text"
-                                        :ref "access_token_secret"
-                                        :className "form-control"
-                                        :placeholder "Twitter Access Token Secret"
-                                        :value (:access_token_secret (:twitter-credentials app-state))
-                                        :onChange #(set-config-state % app-state :access_token_secret)})
+                        (dom/div #js {:className "form-group"}
+                                 (dom/label #js {:htmlFor "twitter_consumer_key"} "Twitter Consumer Key")
+                                 (dom/input #js {:type "text"
+                                                 :ref "consumer_key"
+                                                 :id "twitter_consumer_key"
+                                                 :className "form-control"
+                                                 :placeholder "Twitter Consumer Key"
+                                                 :value (:consumer_key (:twitter-credentials app-state))
+                                                 :onChange #(set-config-state % app-state :consumer_key)}))
+                        (dom/div #js {:className "form-group"}
+                                 (dom/label #js {:htmlFor "twitter_consumer_secret"} "Twitter Consumer Secret")
+                                 (dom/input #js {:type "text"
+                                                 :ref "consumer_secret"
+                                                 :id "twitter_consumer_secret"
+                                                 :className "form-control"
+                                                 :placeholder "Twitter Consumer Secret"
+                                                 :value (:consumer_secret (:twitter-credentials app-state))
+                                                 :onChange #(set-config-state % app-state :consumer_secret)}))
+                        (dom/div #js {:className "form-group"}
+                                 (dom/label #js {:htmlFor "access_token_key"} "Twitter Access Token Key")
+                                 (dom/input #js {:type "text"
+                                                 :ref "access_token_key"
+                                                 :id "access_token_key"
+                                                 :className "form-control"
+                                                 :placeholder "Twitter Access Token Key"
+                                                 :value (:access_token_key (:twitter-credentials app-state))
+                                                 :onChange #(set-config-state % app-state :access_token_key)}))
+                        (dom/div #js {:htmlFor "access_token_secret"}
+                                 (dom/label #js {:htmlFor "access_token_secret"} "Twitter Access Token Secret")
+                                 (dom/input #js {:type "text"
+                                                 :ref "access_token_secret"
+                                                 :id "access_token_secret"
+                                                 :className "form-control"
+                                                 :placeholder "Twitter Access Token Secret"
+                                                 :value (:access_token_secret (:twitter-credentials app-state))
+                                                 :onChange #(set-config-state % app-state :access_token_secret)}))
                         (dom/span #js {:className ""}
                                   (dom/button
                                    #js {:onClick (fn []
