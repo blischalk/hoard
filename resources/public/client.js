@@ -81967,9 +81967,9 @@ goog.require("hoard.global_ui");
 goog.require("hoard.index_user");
 hoard.core.gui = require("nw.gui");
 if (cljs.core._EQ_.call(null, process.platform, "darwin")) {
-  var mb_35962 = new hoard.core.gui.Menu(cljs.core.clj__GT_js.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "type", "type", 1174270348), "menubar"], null)));
-  mb_35962.createMacBuiltin("RoboPaint", cljs.core.clj__GT_js.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "hideEdit", "hideEdit", 1389381217), false], null)));
-  hoard.core.gui.Window.get().menu = mb_35962;
+  var mb_36188 = new hoard.core.gui.Menu(cljs.core.clj__GT_js.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "type", "type", 1174270348), "menubar"], null)));
+  mb_36188.createMacBuiltin("Hoard", cljs.core.clj__GT_js.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "hideEdit", "hideEdit", 1389381217), false], null)));
+  hoard.core.gui.Window.get().menu = mb_36188;
 } else {
 }
 hoard.config.init.call(null, function() {

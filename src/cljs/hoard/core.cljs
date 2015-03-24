@@ -13,7 +13,7 @@
 (def gui (js/require "nw.gui"))
 (when (= process.platform "darwin")
   (let [mb (gui.Menu. (clj->js {:type "menubar"}))]
-    (.createMacBuiltin mb "RoboPaint" (clj->js {:hideEdit false}))
+    (.createMacBuiltin mb "Hoard" (clj->js {:hideEdit false}))
     (set! (.-menu (.get gui.Window)) mb)))
 
 
