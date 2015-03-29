@@ -6,7 +6,7 @@
             [om.core :as om]))
 
 ;; Get the indexed users from es
-(defn get-indexed-users [app-state]
+(defn get-indexed-users [app-state cb]
   (es/get-users
    (fn [resp]
      (let [tweet-data (array-seq (aget resp
@@ -15,8 +15,9 @@
                                        "buckets"))]
        (when tweet-data
          (om/update! app-state
-                     :indexed-users
-                     tweet-data))))))
+                          :indexed-users
+                          tweet-data))
+       (cb)))))
 
 ;; Indexed users UI
 

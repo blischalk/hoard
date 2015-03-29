@@ -18,17 +18,21 @@
 
 (defn index-user! [owner screen-name comm]
   (om/set-state! owner :screen-name "")
-  (om/transact! (om/root-cursor state/app-state) :indexing-users #(conj % screen-name))
+  (om/transact!
+    (om/root-cursor state/app-state)
+    :indexing-users
+    #(conj % screen-name))
   (acquire/data screen-name comm))
 
 ;; Indexing Complete
 
 (defn index-complete [owner screen_name comm]
   (.log js/console "user " screen_name "has been indexed!")
-  (ius/get-indexed-users (om/root-cursor state/app-state))
-  (om/transact! (om/root-cursor state/app-state)
-                :indexing-users
-                (fn [col] (vec (remove #(= % screen_name) col)))))
+  (ius/get-indexed-users (om/root-cursor state/app-state) (fn []))
+  (om/transact!
+    (om/root-cursor state/app-state)
+    :indexing-users
+    (fn [col] (vec (remove #(= % screen_name) col)))))
 
 ;; Event Dispatch
 
@@ -91,10 +95,10 @@
   (js->map->js #(aget % field) col))
 
 
-(defn build-graph [rows]
+(defn build-graph [owner rows]
   ;; Place shared info in let bindings
-  (let [svg (.select js/d3 "#user-graph-chart")
-        container (js/d3.select (.-parentNode (.node svg)))
+  (let [svg (js/d3.select (om/get-node owner "user-graph-chart"))
+        container (js/d3.select (om/get-node owner "user-graph"))
         data (clj->js rows)
         counts (js->map->field->js "doc_count" data)
         names (js->map->field->js "key" data)
@@ -161,26 +165,30 @@
 
 (defn user-graph [app-state owner]
   (reify
+    om/IDidMount
+    (did-mount [_]
+      (build-graph owner (.-value (:indexed-users app-state))))
     om/IRenderState
     (render-state [this state]
-      (dom/div #js {:id "user-graph"
-                    :className "section"}
-               (let [rows (.-value (:indexed-users app-state))
-                     graph (dom/svg #js {:className "chart"
-                                         :id "user-graph-chart"})]
-                 (when (not-empty rows) (build-graph rows))
-                 graph)))))
+      (dom/div
+        #js {:id        "user-graph"
+             :ref       "user-graph"
+             :className "section"}
+        (dom/svg
+          #js {:className "chart"
+               :id        "user-graph-chart"
+               :ref       "user-graph-chart"})))))
 
 ;; Main UI
 (defn main-view [app-state owner state comm]
   (dom/div nil
-           (eh/error-flash app-state)
-           ;; Display the indexing form view
-           (user-indexing-form owner state comm)
-           ;; Display indexing status view
-           (om/build ubi/users-being-indexed (:indexing-users app-state))
-           (om/build ius/users-in-index app-state)
-           (om/build user-graph app-state)))
+    (eh/error-flash app-state)
+    ;; Display the indexing form view
+    (user-indexing-form owner state comm)
+    ;; Display indexing status view
+    (om/build ubi/users-being-indexed (:indexing-users app-state))
+    (om/build ius/users-in-index app-state)
+    (om/build user-graph app-state)))
 
 (defn indexing-ui [app-state owner]
   (reify
@@ -196,7 +204,6 @@
 
         ;; Listen for updates and dispatch accordingly
         (go
-          (ius/get-indexed-users app-state)
           (while true
               (let [[type value] (<! comm)]
                 (handle-event type owner value comm))))))
@@ -215,4 +222,7 @@
   (om/root indexing-ui state/app-state
     {:target (. js/document (getElementById "main-content"))}))
 
-(defn init [] (secretary/dispatch! (indexing-path)))
+(defn init []
+  (ius/get-indexed-users
+    (om/root-cursor state/app-state)
+    (fn [] (secretary/dispatch! (indexing-path)))))
