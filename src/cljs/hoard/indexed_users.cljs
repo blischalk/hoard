@@ -8,16 +8,17 @@
 ;; Get the indexed users from es
 (defn get-indexed-users [app-state cb]
   (es/get-users
-   (fn [resp]
-     (let [tweet-data (array-seq (aget resp
-                                       "aggregations"
-                                       "screen_names"
-                                       "buckets"))]
-       (when tweet-data
-         (om/update! app-state
-                          :indexed-users
-                          tweet-data))
-       (cb)))))
+    (fn [_])
+    (fn [resp]
+      (let [tweet-data (array-seq (aget resp
+                                        "aggregations"
+                                        "screen_names"
+                                        "buckets"))]
+        (when tweet-data
+          (om/update! app-state
+                      :indexed-users
+                      tweet-data))
+        (cb)))))
 
 ;; Indexed users UI
 

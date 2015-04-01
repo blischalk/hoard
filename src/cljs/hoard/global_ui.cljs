@@ -11,7 +11,7 @@
       (dom/div #js {:className "container"}
 
                (dom/h1 nil "Hoard")
-               (mn/build main-nav app-state)
+               (mn/build app-state)
                (dom/div #js {:id "main-content"})))))
 
 (defn init []

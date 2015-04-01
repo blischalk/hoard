@@ -13,6 +13,8 @@
 (def client
   (new Elasticsearch.Client cfg))
 
+(set! window.es-client client)
+
 (defn ping-success[body]
   (.log js/console
         "booya baby!  Elasticsearch is up and running!"))
@@ -50,7 +52,7 @@
                  (.log js/console "all is well"))))))
 
 
-(defn get-users [cb]
+(defn get-users [ecb scb]
   (.search client
            (js-obj "index" "tweets"
                    "searchType" "count"
@@ -63,5 +65,30 @@
                                                   (js-obj "field"
                                                           "user.screen_name")))))
            (fn [err resp]
-             (if err (.log js/console err)
-                 (cb resp)))))
+             (if err (do (.log js/console err)
+                         (ecb err))
+                     (scb resp)))))
+
+
+(defn create-tweets-index [cb]
+  (.log js/console "Attempting to create Tweets index..............")
+  (.create (.-indices client)
+           (js-obj "index" "tweets"
+                   "type" "tweet")
+           (fn [error resp]
+             (if error
+               (.log js/console "Error creating the index")
+               (do (.log js/console
+                         "The index was created or already exists!")
+                   (cb)))))
+  )
+
+(defn init [cb]
+  ;; Not ideal to piggyback off of geet-users to generate index
+  ;; FIXME: Look into a way to not have to piggyback
+  (get-users (fn [err]
+               (if (= "IndexMissingException[[tweets] missing]"
+                      (aget err "message"))
+                 (create-tweets-index cb)))
+             (fn [resp] (cb))))
+

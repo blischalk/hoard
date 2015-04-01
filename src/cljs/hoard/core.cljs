@@ -1,6 +1,7 @@
 (ns hoard.core
   (:require [cljs.nodejs :as node]
             [hoard.config :as cfg]
+            [hoard.elasticsearch :as es]
             [hoard.global-ui :as gui]
             [hoard.index-user :as iu]))
 
@@ -16,12 +17,17 @@
 ;; Initialize UI
 
 (cfg/init
- (fn []
-   ;; Add global UI
+  (fn []
+    ;; Bootstrap es index
+    (es/init
+      (fn []
 
-   (gui/init)
+        ;; Add global UI
 
-   ;; Initialize the indexing UI
+        (gui/init)
+
+        ;; Initialize the indexing UI
 
 
-   (iu/init)))
+        (iu/init)))))
+
